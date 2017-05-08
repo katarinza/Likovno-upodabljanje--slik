@@ -1,0 +1,26 @@
+\documentclass{minimal}
+\usepackage{tikz}
+\usepackage[active, pdftex, tightpage]{preview}
+\usetikzlibrary{decorations.markings,arrows}
+\PreviewEnvironment{figure}
+\setlength\oddsidemargin{0in}
+%
+\begin{document}
+% točkovna transformacija - diagram
+\begin{figure}
+\begin{tikzpicture}
+%
+% območja
+\draw [fill=blue] (0,0) rectangle (3,3);
+\draw [fill=gray!20] (4.5,0) rectangle (7.5,3);
+% % koordinate
+\node[] (A) at (2.1,2.5,0) {};
+\node[circle,fill,blue,scale=0.6] (B) at (6.6,2.5,0) {};
+%
+%vektor
+\draw[postaction={decorate,decoration={markings,mark=at position 1 with {\arrow[black,line width=1.5pt]{>}}}}](A)--(B);
+%
+\end{tikzpicture}
+\end{figure}
+%
+\end{document}

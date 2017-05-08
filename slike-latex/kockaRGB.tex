@@ -1,0 +1,55 @@
+\documentclass{minimal}
+\usepackage{tikz}
+\usepackage[active, pdftex, tightpage]{preview}
+\PreviewEnvironment{figure}
+\setlength\oddsidemargin{0in}
+%
+\begin{document}
+% slika 1
+\begin{figure}
+\begin{tikzpicture}
+%points on cube
+\coordinate (A) at (0,0,0);
+\node[left,text depth=20pt] at (A) {\textbf{black}};
+\coordinate (B) at (0,0,4);
+\node[left,text depth=20pt] at (B) {\textbf{Red}};
+\coordinate (C) at (0,4,4);
+\node[left,text depth=20pt] at (C) {\textbf{magenta}};
+\coordinate (D) at (0,4,0);
+\node[left,text depth=20pt] at (D) {\textbf{Blue}};
+\coordinate (E) at (4,0,0);
+\node[left,text depth=20pt] at (E) {\textbf{Green}};
+\coordinate (F) at (4,0,4);
+\node[left,text depth=20pt] at (F) {\textbf{yellow}};
+\coordinate (G) at (4,4,4);
+\node[left,text depth=20pt] at (G) {\textbf{white}};
+\coordinate (H) at (4,4,0);
+\node[left,text depth=20pt] at (H) {\textbf{cyan}};
+
+%draw cube
+\draw [dashed, thick] (A) -- (B);
+\draw [dashed, thick] (B) -- (C);
+\draw [dashed, thick] (C) -- (D);
+\draw [dashed, thick] (D) -- (A);
+\draw [dashed, thick] (E) -- (F);
+\draw [dashed, thick] (F) -- (G);
+\draw [dashed, thick] (G) -- (H);
+\draw [dashed, thick] (H) -- (E);
+\draw [dashed, thick] (A) -- (E);
+\draw [dashed, thick] (B) -- (F);
+\draw [dashed, thick] (C) -- (G);
+\draw [dashed, thick] (D) -- (H);
+\draw [dashed] (A) -- (G);
+
+%place non-atom cube corners
+\shadedraw [ball color= black] (A) circle (0.2cm);
+\shadedraw [ball color= red] (B) circle (0.2cm);
+\shadedraw [ball color= magenta] (C) circle (0.2cm);
+\shadedraw [ball color= blue] (D) circle (0.2cm);
+\shadedraw [ball color= green] (E) circle (0.2cm);
+\shadedraw [ball color= yellow] (F) circle (0.2cm);
+\shadedraw [ball color= white] (G) circle (0.2cm);
+\shadedraw [ball color= cyan] (H) circle (0.2cm);
+\end{tikzpicture}
+\end{figure}
+\end{document}

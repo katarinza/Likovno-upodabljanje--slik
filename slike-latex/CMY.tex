@@ -1,0 +1,28 @@
+\documentclass{minimal}
+\usepackage{tikz}
+\usepackage[active, pdftex, tightpage]{preview}
+\PreviewEnvironment{figure}
+\setlength\oddsidemargin{0in}
+%
+\begin{document}
+% slika 1
+\begin{figure}
+\begin{tikzpicture}
+
+\draw[very thick, cyan] (0,0) circle (3cm);
+\draw[very thick, magenta] (3.5,0) circle (3cm);
+\draw[very thick, yellow] (1.75,-3) circle (3cm);
+
+\node[scale=1.5, color=cyan] at (-1.2,1) {\textbf{Cyan}};
+\node[scale=1.5, color=magenta] at (4.5,1) {\textbf{Magenta}};
+\node[scale=1.5, color=yellow] at (1.75,-4) {\textbf{Yellow}};
+
+\node[scale=1.5] at (1.75,0.8) {\textbf{blue}};
+\node[scale=1.5] at (0.2,-2.25) {\textbf{red}};
+\node[scale=1.5] at (3.3,-2.3) {\textbf{green}};
+
+\node[scale=1.5] at (1.75,-1) {\textbf{black}};
+
+\end{tikzpicture}
+\end{figure}
+\end{document}

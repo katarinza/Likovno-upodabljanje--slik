@@ -1,0 +1,330 @@
+\documentclass[11pt,a4paper,twoside,slovene]{book}
+% Za latex matrike: http://en.wikibooks.org/wiki/LaTeX/Mathematics
+%%% Uvoženi paketi in uporaba pravil.
+\usepackage[slovene]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{url}
+\usepackage{fancyhdr}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{mathtools}
+\usepackage{theorem}
+\usepackage[unicode]{hyperref}
+\usepackage{calrsfs}
+\usepackage{gensymb}
+\usepackage{tikz}
+\overfullrule=15pt % oznaci predolgo vrstico
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+%%% Makroji
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\R}{\mathbb R}
+\newcommand{\N}{\mathbb N}
+\newcommand{\Z}{\mathbb Z}
+\renewcommand{\C}{\mathbb C}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\NN}{\pazocal{N}}
+\newcommand{\F}{\pazocal{F}}
+\renewcommand{\O}{\pazocal{O}}
+\renewcommand{\l}{\ell}
+\renewcommand{\L}{\mathfrak L}
+\newcommand{\LL}{\pazocal{L}}
+\newcommand{\I}{\pazocal{I}}
+\newcommand{\J}{\pazocal{J}}
+\newcommand{\fun}[3]{#1 : #2 \to #3}
+\newcommand{\norm}[1]{\left\|#1\right\|}
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\argmax}{\textup{argmax}}
+\newcommand{\argmin}{\textup{argmin}}
+\newcommand{\getvalue}[2]{#1 \gets #2}
+\newcommand{\iu}{{i\mkern1mu}}
+
+%%% Definicije okolij za izreke ipd.
+{
+   \theorembodyfont{\itshape}
+   \newtheorem{trditev}{Trditev}[chapter]
+   \newtheorem{izrek}[trditev]{Izrek}
+   \newtheorem{lema}[trditev]{Lema}
+   \newtheorem{izjava}[trditev]{Izjava}
+   \newtheorem{posledica}[trditev]{Posledica}
+   \newtheorem{hipoteza}[trditev]{Hipoteza}
+ }
+
+ {
+   \theorembodyfont{\rmfamily}
+   \newtheorem{definicija}[trditev]{Definicija}
+   \newtheorem{primer}[trditev]{Primer}
+   \newtheorem{opomba}[trditev]{Opomba}
+ }
+
+%%% Okolje za dokaze.
+\newenvironment{dokaz}{
+  \goodbreak\par
+  \textit{Dokaz.}%
+}{%
+  \nopagebreak
+  \hfill{\vrule width 1ex height 1ex depth 0ex}
+  \medskip
+  \goodbreak
+}
+
+%%% Okolje za algoritme
+\usepackage{algpseudocode, algorithm}
+\floatname{algorithm}{Algoritem}
+\renewcommand{\algorithmicrequire}{\textbf{Vhodni podatki:}}
+\renewcommand{\algorithmicensure}{\textbf{Izhodni podatki:}}
+
+%%% Stil strani & margine
+
+%% A4 stran = 210mm x 297mm
+%% sirino besedila nastavimo na 170mm, visino na 247mm
+
+\setlength{\textwidth}{15cm}
+\setlength{\textheight}{224mm}
+
+\setlength{\topmargin}{0cm}
+\setlength{\evensidemargin}{0cm}
+\setlength{\oddsidemargin}{\paperwidth}
+\addtolength{\oddsidemargin}{-\textwidth}
+\addtolength{\oddsidemargin}{-2in}
+
+%TODO Ne dela pri meni ... čemu je to namenjeno???
+%\addtolength{\headwidth}{\marginparsep}
+%\addtolength{\headwidth}{\marginparwidth}
+
+\pagestyle{fancyplain}
+
+\renewcommand{\headrulewidth}{0.2pt}
+\addtolength{\headheight}{2pt}
+
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+
+\lhead[\fancyplain{}{{\thepage}}]%
+      {\fancyplain{}{{\rightmark}}}
+\rhead[\fancyplain{}{{\leftmark}}]%
+      {\fancyplain{}{\thepage}}
+\cfoot{}
+\lfoot[]{}
+\rfoot[]{}
+
+%% Define a new 'leo' style for the package that will use a smaller font.
+\makeatletter
+\def\url@leostyle{%
+  \@ifundefined{selectfont}{\def\UrlFont{\sf}}{%
+    \def\UrlFont{\small\sffamily}}\Url@do
+}
+\makeatother
+
+%% Now actually use the newly defined style.
+\urlstyle{leostyle}
+\newcommand{\myurl}[1]{\url{#1}}
+
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+
+\author{Katarina Zadražnik} % FIXME Avtor
+\title{KatarinzArt} % FIXME Naslov
+
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+
+\begin{document}
+
+\frontmatter
+\pagestyle{empty}
+
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+% NASLOVNA STRAN
+\begin{flushleft}
+\noindent
+\textsc{\Large UNIVERZA V LJUBLJANI}\\
+\textsc{\Large FAKULTETA ZA MATEMATIKO IN FIZIKO}\\
+\medskip
+\Large Matematika -- 2.\ stopnja
+\end{flushleft}
+
+\vfill
+
+\begin{center}
+ {\LARGE Katarina Zadražnik} % FIXME Avtor
+
+  \bigskip
+  \medskip
+  {\bfseries {\Huge Likovno upodabljanje slik}} % FIXME Naslov magistrskega dela
+
+  \bigskip
+  \medskip
+
+  {\LARGE Magistrsko delo}
+  
+  \bigskip
+  \medskip
+  
+  {\Large Mentor: izred.\ prof.\ dr.\ Andrej Bauer} % FIXME Mentor
+\end{center}
+
+\vfill
+\vfill
+\noindent
+{\Large Ljubljana, 2014} % FIXME Leto oddaje naloge
+
+\cleardoublepage
+
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+% IZJAVA
+\null
+\vfill
+\noindent Podpisana {Katarina Zadražnik} izjavljam: % FIXME Avtor
+\begin{itemize}
+ \item[--] da sem magistrsko delo z naslovom ?????????????????? izdelala samostojno pod mentorstvom {izred.\ prof.\ dr.\ Andreja Bauerja}, ter % FIXME Naslov, mentor in somentor, če je
+ \item[--] da Fakulteti za matematiko in fiziko Univerze v Ljubljani dovoljujem objavo elektronske oblike svojega dela na spletnih straneh.
+\end{itemize}
+Ljubljana, \today \hfill Podpis:\hspace{5cm} % Datum se nastavi na ``danes''
+
+\cleardoublepage
+
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+% ZAHVALA
+% TODO napiši zahvalo
+\chapter*{Zahvala}
+Tralala
+% FIXME Zahvala, če je (če je ni se zbriše vse do kazala)
+
+\cleardoublepage
+
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+% KAZALO
+\pagestyle{fancyplain}
+
+{
+\renewcommand{\markboth}[2]{}
+\tableofcontents
+}
+
+\cleardoublepage
+
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+% KAZALO SLIK (Če je potrebno)
+
+%{
+%\renewcommand{\markboth}[2]{}
+%\listoffigures
+%}
+%
+%\cleardoublepage
+
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+% PROGRAM
+% TODO program dela (Bauer)
+\chapter*{Program dela}
+\addcontentsline{toc}{chapter}{\numberline{}Program dela}
+
+% FIXME Program dela
+
+\bigskip
+
+\begin{flushleft}
+  Ljubljana, datum % FIXME Kraj in datum programa dela
+\end{flushleft}
+
+\bigskip
+
+\begin{flushright}
+  izred.\ prof.\ dr.\ Andrej Bauer % FIXME Mentor
+  \quad 
+\end{flushright}
+
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+% POVZETEK
+% TODO napiši povzetke (na koncu bo itak to)
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{\numberline{}Povzetek}
+
+\thispagestyle{empty}
+\begin{center}
+{\Large \sc Povzetek}
+\end{center}
+% FIXME Povzetek
+Povzetek bo na koncu.
+
+\vfill
+\begin{center}
+{\Large \sc Abstract}
+\end{center}
+% FIXME Abstract
+
+% TODO
+\vfill
+\noindent
+\textbf{Math.\ Subj.\ Class.\ (MSC 2010):} \texttt{XXXXXX}, \texttt{YYYYYY} % FIXME MSC, www.ams.org/msc/
+
+\noindent
+\textbf{Ključne besede:} foo, bar, baz % FIXME Ključne besede
+
+\noindent
+\textbf{Keywords:} foo, bar, baz % FIXME Keywords
+
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+% POGLAVJA
+\mainmatter
+
+%\include{./poglavja/poglavje1}
+
+%\include{./poglavja/poglavje2}
+
+%\include{./poglavja/poglavje3}
+
+\include{./poglavja/Uvod}
+
+\include{./poglavja/ObdelavaSlik}
+
+\include{./poglavja/papir}
+
+\include{./poglavja/LikovnoUpodabljanjeSlik}
+
+\include{./poglavja/painterly}
+
+\include{./poglavja/voscenke}
+
+\include{./poglavja/svincnik}
+
+%--------------------------------------------------------------------
+%--------------------------------------------------------------------
+% BIBLIOGRAFIJA
+
+% \phantom{\cite{*}}
+
+\cleardoublepage
+\phantomsection
+
+\nocite{*} % Če želiš, da navede vse vnose v bibliografski datoteki (tudi tista, ki v besedilu niso direktno citirana)
+
+\bibliographystyle{bookSLO}
+\addcontentsline{toc}{chapter}{\numberline{}Literatura}
+\markboth{}{Literatura}
+
+{
+\raggedright
+\renewcommand{\markboth}[2]{}
+\bibliography{./literatura}
+}
+
+% Če so dodatki, se odkomentira spodnje tri vrstice
+
+% \renewcommand{\appendixtocname}{Dodatki}
+% \renewcommand{\appendixpagename}{Dodatki}
+
+% \include{dodatki}
+
+\end{document}

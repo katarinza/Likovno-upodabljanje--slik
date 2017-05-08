@@ -1,0 +1,201 @@
+\begin{thebibliography}{10}
+
+\bibitem{Hertzmann:Video}
+K.~Perlin A.~Hertzmann, \emph{Painterly Rendering for Video and Interaction},
+  NPAR '00 Proceedings of the 1st international symposium on Non-photorealistic
+  animation and rendering, ACM New York, NY, USA, 2000, str.~7--12.
+
+\bibitem{Appel:Haloed}
+A.~Appel, F.~J. Rohlf, A.~J. Stein, \emph{The haloed line effect for hidden
+  line elimination}, SIGGRAPH '79 Proceedings of the 6th annual conference on
+  Computer graphics and interactive techniques, ACM New York, NY, USA, 1979,
+  str.~151--157.
+
+\bibitem{Buades:NLA}
+A.\ Buades, B.\ Coll, J.\ Morel, \emph{A Non--Local Algorithm for Image
+  Denoising}, CVPR '05 Proceedings of the 2005 IEEE Computer Society Conference
+  on Computer Vision and Pattern Recognition, IEEE Computer Society Washington,
+  DC, USA, 2005, str.~60--65.
+
+\bibitem{Buades:PDE}
+A.~Buades, B.~Coll, J.~M. Morel, \emph{Neighborhood Filters and PDE's},
+  Numerische Mathematik \textbf{105} (2006), 1--34.
+
+\bibitem{Cohen:Aaron}
+H.~Cohen, \emph{The Further Exploits of Aaron, Painter}, Stanford Humanities
+  Review \textbf{4} (1995), 141--158.
+
+\bibitem{Curtis:Watercolor}
+C.~J. Curtis, S.~E. Anderson, J.~E. Seims, K.~W. Fleischer, D.~H. Salesin,
+  \emph{Computer-generated Watercolor}, SIGGRAPH '97 Proceedings of the 24th
+  annual conference on Computer graphics and interactive techniques, ACM
+  Press/Addison-Wesley Publishing Co. New York, NY, USA, 1997, str.~421--430.
+
+\bibitem{Daniels:Tarzan}
+E.~Daniels, \emph{Deep canvas in Disney's Tarzan}, SIGGRAPH '99 ACM SIGGRAPH 99
+  Conference abstracts and applications, ACM New York, NY, USA, 1999,
+  str.~200--200.
+
+\bibitem{Frazier:AnIntro}
+M.~W. Frazier, \emph{An Introduction to Wavelets Through Linear Algebra},
+  Springer--Verlag New York, New York, USA, 1999.
+
+\bibitem{Haeberli:PaintNumbers}
+P.~Haeberli, \emph{Paint By Numbers: Abstract Image Representations}, SIGGRAPH
+  '90 Proceedings of the 17th annual conference on Computer graphics and
+  interactive techniques, ACM New York, NY, USA, 1990, str.~207--214.
+
+\bibitem{Hays:Animation}
+J.~Hays, I.~Essa, \emph{Image and Video Based Painterly Animation}, NPAR '04
+  Proceedings of the 3rd international symposium on Non-photorealistic
+  animation and rendering, ACM New York, NY, USA, 2004, str.~113--120.
+
+\bibitem{Hertzmann:BrushStrokes}
+A.~Hertzmann, \emph{Painterly Rendering with Curved Brush Strokes of Multiple
+  Sizes}, SIGGRAPH '98 Proceedings of the 25th Annual Conference on Computer
+  Graphics and Interactive Techniques, ACM New York, NY, USA, 1998,
+  str.~453--460.
+
+\bibitem{Hertzmann:Relaxation}
+A.~Hertzmann, \emph{Paint By Relaxation}, Tech. report, New York University,
+  NY, USA, 2000.
+
+\bibitem{Hertzmann:Texture}
+A.~Hertzmann, \emph{Fast Paint Texture}, NPAR '02 Proceedings of the 2nd
+  international symposium on Non-photorealistic animation and rendering, ACM
+  New York, NY, USA, 2002, str.~91--ff.
+
+\bibitem{Hertzmann:ScienceArt}
+A.\ Hertzmann, \emph{Non-Photorealistic Rendering and the Science of Art}, NPAR
+  '10 Proceedings of the 8th International Symposium on Non-Photorealistic
+  Animation and Rendering, ACM New York, NY, USA, 2012, str.~147--157.
+
+\bibitem{Huang:Natural}
+H.~Huang, T.~N. Fu, C.~F. Li, \emph{Painterly Rendering with Content-dependent
+  Natural Paint Strokes}, The Visual Computer: International Journal of
+  Computer Graphics \textbf{27} (2011), 861--871.
+
+\bibitem{Kamada:Hidden}
+T.~Kamada, S.~Kawai, \emph{An Enhanced Treatment of Hidden Lines}, ACM
+  Transactions on Graphics (TOG) \textbf{6} (1987), 308--323.
+
+\bibitem{Wang:fastNMD}
+V.~Karnati, M.~Uliyar, S.~Deyl, \emph{Fast Non--Local Algorithm for Image
+  Denoising}, ICIP '09 Proceedings of the16th IEEE International Conference on
+  Image Processing, IEEE Press Piscataway NJ, USA, 2009, str.~3829--3832.
+
+\bibitem{Klein:Virtual}
+A.~Klein, M.~M.~Kazhdan W.~Li, W.~T. Corr\^ea, A.~Finkelstein, T.~A.
+  Funkhouser, \emph{Non-photorealistic Virtual Environments}, SIGGRAPH '00
+  Proceedings of the 27th annual conference on Computer graphics and
+  interactive techniques, ACM Press/Addison-Wesley Publishing Co. New York, NY,
+  USA, 2000, str.~527--534.
+
+\bibitem{Lee:Motion}
+H.~Lee, C.~H. Lee, K.~Yoon, \emph{Motion Based Painterly Rendering}, EGSR'09
+  Proceedings of the Twentieth Eurographics conference on Rendering,
+  Eurographics Association Aire-la-Ville, Switzerland, Switzerland, 2009,
+  str.~1207--1215.
+
+\bibitem{Lind:Gauss-dokaz}
+M.~Lindenbaum, M.~Fischer, A.~M. Bruckstein, \emph{On Gabor's Contribution to
+  Image Enhancement}, Pattern Recognition \textbf{27} (1994), 1--8.
+
+\bibitem{Litwinowicz:VideoImpressionist}
+P.~Litwinowicz, \emph{Processing Images and Video For an Impressionist Effect},
+  SIGGRAPH '97 Proceedings of the 24th annual conference on Computer graphics
+  and interactive techniques, ACM Press/Addison-Wesley Publishing Co. New York,
+  NY, USA, 1997, str.~407--414.
+
+\bibitem{Lu:CombiningSketch}
+C.~Lu, L.~Xu, J.~Jia, \emph{Combining Sketch and Tone for Pencil Drawing
+  Production}, NPAR '12 Proceedings of the Symposium on Non-Photorealistic
+  Animation and Rendering, Eurographics Association Aire-la-Ville, Switzerland,
+  2012, str.~65--73.
+
+\bibitem{Shiraishi:LocalSource}
+Y.~Yamaguchi M.~Shiraishi, \emph{An Algorithm for Automatic Painterly Rendering
+  Based on Local Source Image Approximation}, NPAR '00 Proceedings of the 1st
+  international symposium on Non-photorealistic animation and rendering, ACM
+  New York, NY, USA, 2000, str.~53--58.
+
+\bibitem{Meier:Animation}
+B.~J. Meier, \emph{Painterly Rendering for Animation}, SIGGRAPH '96 Proceedings
+  of the 23rd annual conference on Computer graphics and interactive
+  techniques, ACM New York, NY, USA, 1996, str.~477--484.
+
+\bibitem{Miyata:Stone}
+K.~Miyata, \emph{A method of generating stone wall patterns}, SIGGRAPH '90
+  Proceedings of the 17th annual conference on Computer graphics and
+  interactive techniques, ACM New York, NY, USA, 1990, str.~387--394.
+
+\bibitem{Morbey:Aaron}
+M.~L. Morbey, \emph{From Canvas to Computer: Harold Cohen's Artificial
+  Intelligence Paradigm for Art Making}, doktorska disertacija, The Ohio State
+  University, Ohio, USA, 1992.
+
+\bibitem{Perona-Malik}
+P.~Perona, J.~Malik, \emph{Scale-Space and Edge Detection Using Anisotropic
+  Diffusion}, IEEE Transactions on Pattern Analysis and Machine Intelligence
+  \textbf{12} (1990), 629--639.
+
+\bibitem{Rudolf:WaxCrayon}
+D.\ Rudolf, D.\ Mould, E.\ Neufeld, \emph{Simulating Wax Crayons}, PG '03
+  Proceedings of the 11th Pacific Conference on Computer Graphics and
+  Applications, IEEE Computer Society Washington, DC, USA, 2003, str.~163--172.
+
+\bibitem{DRudolf:BiWaxCrayon}
+D.\ Rudolf, D.\ Mould, E.\ Neufeld, \emph{A Bidirectional Deposition Model of
+  Wax Crayons}, Computer Graphics Forum \textbf{24} (2005), 27--39.
+
+\bibitem{Salisbury:OrientableTextures}
+M.~P. Salisbury, M.~T. Wong, J.~F. Hughes, D.~H. Salesin, \emph{Orinetable
+  Textures for Image-Based Pen-and-Ink Illustration}, SIGGRAPH '97 Proceedings
+  of the 24th Annual Conference on Computer Graphics and Interactive
+  Techniques, ACM Press/Addison-Wesley Publishing Co. New York, NY, USA, 1997,
+  str.~401--406.
+
+\bibitem{Seligmann:Automated}
+D.~D. Seligmann, S.~Feiner, \emph{Automated Generation of Intent-based 3D
+  Illustrations}, SIGGRAPH '91 Proceedings of the 18th annual conference on
+  Computer graphics and interactive techniques, ACM New York, NY, USA, 1991,
+  str.~123--132.
+
+\bibitem{Susan:Filter}
+S.~M. Smith, J.~M. Brady, \emph{SUSAN - A New Approach to Low Level Image
+  Processing}, International Journal of Computer Vision \textbf{23} (1997),
+  45--78.
+
+\bibitem{Goodwin:IsophoteDistance}
+A.~Hertzmann T.~Goodwin, I.~Vollick, \emph{Isophote Distance: A Shading
+  Approach to Artistic Stroke Thickness}, NPAR '07 Proceedings of the 5th
+  international symposium on Non-photorealistic animation and rendering, ACM
+  New York, NY, USA, 2007, str.~53--62.
+
+\bibitem{Treavett:Statistical}
+S.~M.~F. Treavett, M.~Chen, \emph{Statistical Techniques for the Automated
+  Synthesis of Non-photorealistic Images}, Proc. 15th Eurogaphics UK
+  Conference, 1997.
+
+\bibitem{Turk:Guided}
+G.~Turk, D.~Banks, \emph{Image-guided Streamline Placement}, SIGGRAPH '96
+  Proceedings of the 23rd annual conference on Computer graphics and
+  interactive techniques, ACM New York, NY, USA, 1996, str.~453--460.
+
+\bibitem{Winkenbach:ComputerGenerated}
+G.~Winkenbach, D.~H. Salesin, \emph{Computer-Generated Pen-and-Ink
+  Illustrations}, SIGGRAPH '94 Proceedings of the 21st Annual Conference on
+  Computer Graphics and Interactive Techniques, ACM New York, NY, USA, 1994,
+  str.~91--100.
+
+\bibitem{Winkenbach:ParametricSurfaces}
+G.~Winkenbach, D.~H. Salesin, \emph{Rendering Parametric Surfaces in Pen and
+  Ink}, SIGGRAPH '96 Proceedings of the 23rd Annual Conference on Computer
+  Graphics and Interactive Techniques, ACM New York, NY, USA, 1996,
+  str.~469--476.
+
+\bibitem{Yaro:Digital}
+L.~P. Yaroslavsky, \emph{Digital Picture Processing}, Springer-Verlag New York,
+  Inc.~Secaucus, NJ, USA, 1985.
+
+\end{thebibliography}

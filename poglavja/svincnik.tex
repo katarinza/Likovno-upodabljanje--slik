@@ -1,0 +1,127 @@
+\chapter{Risanje s svičnikom}
+V zadnjem poglavju bomo predstavili algoritem za risanje s svinčnikom. Osnova naše implementacije algoritma bo temeljila na članku \cite{}, ki ga bomo prilagodili in dopolnili z nekaterimi dodatnimi koraki iz članka \cite{}.
+
+Kot smo videli že v razdelku \ref{}, lahko pristopimo k risanju s svinčnikom na več načinov. V članku \cite{} predstavljeni postopek risanja sodi v kategorijo risarskih postopkov, kjer senčenje izvedemo tako, da ustvarimo zvezno območje sivine, ki vsebuje teksturo, z linijskimi črtami pa poudarimo linije, ki dajo objektom na sliki obliko. Predstavljeni postopek risanja s svinčnikom v tem članku bomo razdelili v tri faze:
+%
+\begin{enumerate}
+  \item zaznava linij na sliki in izračun linijske slike $\tilde{S}$;
+  \item izračun sivinske slike $T$;
+  \item kompozicija linijske in sivinske slike v skupno risbo $R$.
+\end{enumerate}
+%
+Posamezne faze bomo predstavili v prvih treh razdelkih, v zadnjem razdelku pa bomo opisali našo implementacijo tega algoritma in njegovo analizo skupaj z dodatnimi primeri.
+%
+\section{Linijska slika}
+Pri risanju s svinčnikom risarji uporabljajo kratke linijske črte. Dolge linijske črte na risbi narišejo kot zaporedje krajših, ki se na koncih nekoliko križajo. Podoben pristop bomo izbrali v našem algoritmu za izračun linijske slike. Končni rezultat, ki ga bomo dobili, bo neosenčena skica vhodne slike.
+
+Za izračun linijske slike bomo morali na vhodni sliki zaznati linije, ki jih želimo narisati, določiti njihov položaj, dolžino, odtenek sivine in debelino. Zaradi prisotnosti teksture in šuma na vhodni sliki, običajni filtri za zaznavo robov na sliki, npr.\  Sobelov filter, ne bodo zadostili likovnim kriterijem. Zato bomo pripravili lastne filtre, ki bodo dali zadovoljiv rezultat tudi v primeru prisotnosti teksture in šuma. V nadaljevanju bomo opisali posamezne korake v algoritmu za risanje linij in jih opremili s primeri.
+%
+\subsection{Classification}
+Vhodno (barvno) sliko moramo najprej pretvoriti v sivinsko sliko $I$. Uporabimo lahko standardno sivinsko pretvorbo ali pa naredimo svetlostno pretvorbo. % Oboje je definirano nekje v razdelku Barvni modeli.
+Eksperimentalno se izkaže, da uporaba svetlostne pretvorbe ponuja boljše izhodišče za zaznavo robov na sliki, zato bomo v našem algoritmu izbrali to pretvorbo. Na dobljeni sliki $I$ bomo nato uporabili še filter za izostritev robov, ki bo linije na sliki naredil bolj izrazite.
+
+Podobno kot v razdelku \ref{sec:filtri}, ko smo izpeljevali filter za zaznavo robov, bomo tudi sedaj s pomočjo gradientnih slik v $x$ in $y$ smereh ($\partial_x I$ in $\partial_y I$) izračunali gradientno sliko
+%
+$$G \coloneqq \sqrt{(\partial_x I)^2 + (\partial_y I)^2} \;.$$
+%
+Kot smo videli pri filtrih za zaznavo robov, znajo ti zaznati robove v treh smereh (vodoravno, navpično, diagonalno), kar pa z likovnega stališča ni zadostno. Pri risanju namreč linijske črte rišemo v poljubnih smereh. Zato bomo definirali množico pomožnih filtrov $\L_n = \set{\LL_i}_i^n$, ki bodo znali zaznati robove v $n$ smereh (posledično bomo znali narisati linijske črte v teh $n$ smereh). Posamezen filter predstavlja linijsko črto v $i$-ti smeri z dolžino, ki je sorazmerna z velikostjo vhodne slike. V našem algoritmu bomo uporabili 4 oz.\ 8 različnih smeri, imeli bomo torej $\L_4 = \set{\LL_1, \LL_2, \LL_3, \LL_4}$ oz.\ $\LL_8 = \set{\LL_1, \LL_2, \ldots, \LL_8}$. Velikost filtrirnih matrik bomo nastavili na $\frac{1}{30}$ velikosti slike.
+
+Zgornje filtrirne matrike bomo sedaj uporabili za izračun množice \emph{odzivnih slik} $\set{G_i}_i^n$, ki ima elemente $G_i$ definirane s formulo
+%
+$$G_i \coloneqq \LL_i \star G \;.$$
+%
+Odzivna slika $G_i$ je torej matrika velikosti vhodne slike, ki ima shranjene podatke o količini. Za vsak piksel torej dobimo na ta način podatke o 8 oz.\ 16 smereh. Izmed teh vrednosti bomo sedaj izbrali tisto vrednost, ki je največja:
+%
+$$
+C_i(p) =
+\begin{cases}
+  G(p) & \mbox{če } \argmax_i\set{G_i(p)} = i, \\ 
+  0      & \mbox{sicer}.
+\end{cases}
+$$
+%
+Z argmax smo si zagotovili, da bomo res imeli eno samo smer (i guess). Z vsako smer na ta način določimo magnitudo slike v tej smeri. Med $G$ in množico $\set{C_i}_i$ obstaja zveza $\sum_{i} C_i = G$. Ker smo za posamezen pregledali njegovo okolico in poračunali gosto množico smeri, smo dobili smeri za piksel, ki so na šum na sliki (pri tem ni mišljen samo šum, npr.\ beli šum, temveč tudi strukture, teksture na originalni sliki, \ldots). 
+%%
+\subsection{Line shaping}
+Sedaj, ko imamo za dane smeri na sliki mape gradientov, bomo za vsak piksel generirali linije oz.\ črtice s pomočjo konvolucije:
+$$S' = \sum_i (\L_i \star C_i).$$
+Vrednosti v dobljenem $S'$ sedaj invertiramo in jih slikamo v interval $[0, 1]$.
+%
+% TODO To bomo že vmes, ko povemo kaj kakšna stvar je, to povedali.
+Pokažemo primere, ko se sekajo linije. Pokažemo primer za množico $C_i$. Pogledamo razliko, če uporabimo luminance ali navadno. Pogledamo razliko, če izostrimo in če ne izostraimo. Pogledamo primer, ko uporabimo različne velikosti za naše konvolucijske matrike itd.\ 
+%
+Na ta način smo dobili skico slike oz.\ linije. Risarji pa poleg risanja linij slike, uporabljajo še senčenje. Senčenje lahko izvedemo tako, da uporabimo hatching. V članku je predstavljen nov način dodajanja sence. Namreč uporabimo kar ton slike.
+%%
+\section{Tone drawing}
+%
+\subsection{Tone Map Generation}
+Spet bomo prvotno sliko najprej s pomočjo filtra pretvorili v črnobelo sliko. Za vsak piksel tako dobimo informacijo o njegovi inteziteti oz.\ stopnji sivine. Vrednosti pikslov preslikamo na interval $[0,1]$, da se bomo izognili problemom pri računanju distribucije oz.\ verjetnosti. Predstavljen je model senčenja s pomočjo tonske distribucije risbe. Za razliko od visoko variabilnih tonov na originalni sliki, risba ponavadi zadošča nekemu modelu.
+%
+\begin{primer}
+Primer fotografije in pa risbe. Ter pripadajoča histograma.
+\end{primer}
+%
+To se zgodi zato, ker risba nastane kot posledica stika med papirjem in svinčnikom (grafitom), ki večinoma sestoji iz dveh glavnih tonov. Za zelo svetla območja na originalni sliki, risar tako ne nariše ničesar, Za linije in poudarjena območja risar poudari z grafitom ta obomočja. Za ostala območja pa uporabi srednje močne tone sivine, da ustvari teksturo in bogatost risbe.
+%!
+\subsection{Model-based Tone Transfer}
+Predstavili bomo parametrični model, ki predstavlja končno tonsko distribucijo, zapisano kot
+$$p(v) = \frac{1}{Z} \sum_{i=1}^{3} \omega_i p_i(v),$$
+kjer je $v$ vrednost sivine in je $p(v)$ verjetnost, da je piksel na sliki pobarvan s tonom $v$. $Z$ je normalizacijska vrednost, ki poskrbi, da je vrednost integrala $\int_0^1 p(v) dv = 1$. Sivinsko lestvico razdelimo na tri dele glede na vrednosti sivine. Verjetnosti $p_i$ pripadajo posameznim delom. Vrednosti $\omega_i$ pa so določena tako, da potem, ko razdelimo tonsko distribucijo v tri dele, preštejmo število pikslov, ki padejo v posamezni del tonske lestvice.
+%
+\begin{primer}
+Na sliki so prikazani je za dano risbo prikazana distribucija. Vsi trije layerji. Ter distribucije za posamezne layerje.
+\end{primer}
+%
+Kot smo videli v zgornjem primeru je glavna razlika med naravnimi slikami in pa risbami ta, da slednja sestoji iz bolj svetlih območij, ki je barva papirja.
+
+Da bi modelirali distribucijo $p_1$, ki pripada svetlejšemu delu tonske lestvice, si bomo pomagali z Laplaceovo porazdelitvijo. Slednja bo imela vrh pri vrednosti 255 (vrednost določimo s pomočjo eksperimenta), kajti piksli se skoncetrirajo okoli te vrednosti in v tej vrednosti vrednost porazdelitve $p$ ostro naraste. Nekaj variacije nastane zaradi uporabe radirke. Definiramo
+$$
+p_1(v) =
+\begin{cases}
+  \frac{1}{\sigma_b} e^{-\frac{1-v}{\sigma_b}} & \mbox{če } v \leq 1, \\
+  0                                                                          & \mbox{sicer}.
+\end{cases}
+$$
+Pri tem je vrednost $\sigma_b$ parameter, ki določa faktor (scale) distribucije.
+
+Za razliko od svetlejšega dela tonske lestvice, srednjetonska lestvica nima (nujno) vrha pri nobeni vrednosti. Zato bomo to porazdelitev zapisali s pomočjo normalne porazdelitve:
+$$
+p_2(v) =
+\begin{cases}
+  \frac{1}{u_b - u_a} & \mbox{če} u_a \leq v \leq u_b, \\
+  0                               & \mbox{sicer}.
+\end{cases}
+$$
+Pri tem sta $u_a$ in $u_b$ parametra, ki vplivata na širino porazdelitve.
+
+Temnejši del tonske lestvice pa bomo spet modelirali s pomočjo Laplaceove porazdelitve:
+$$
+p_3(v) = \frac{1}{\sqrt{2\pi \sigma_d}} e^{-\frac{(v - \mu_d)^2}{2\sigma_d^2}}.
+$$
+Pri tem je $\mu_d$ srednja vrednost in $\sigma_d$ je razpršenost. Variacija pri temnejšem delu tonske lestvice je običajno širša kot pa tista pri svetlejšem delu lestvice.
+%
+\subsection{Parameter learning}
+Parametri, ki nastopajo v formulah za porazdelitve $p_i$, kontrolirajo obliko histogramov za posamezne dele tonske lestvice.
+
+Najprej vhodno sliko pretvorimo v črnobelo, da dobimo $I$. Nato sliko $I$ rahlo zameglimo s pomočjo Gaussovega filtra. V nadaljevanju  moramo za slikovne točke na $I$ določiti v katerega od treh delov sodi posamezen piksel, glede na njegovo vrednost. Za temni in svetli del imamo vnaprej določene tresholde, preostali piksli pa padejo v srednji del sivinske lestvice. Število pikslov, ki padejo v posamezne dele tonske lestvice, določajo uteži $\omega$. Za vsak del tonske lestvice določimo srednjo vrednost $m$ in pa standardno deviacijo $s$, vrednosti parametrov določimo z uporabo Maximum Likelihood Estimation (MLE) ter dobimo parametre zapisane v obliki zaprtih formul:
+%
+\begin{align*}
+\sigma_b & = \frac{1}{N} \sum_{i = 1}^N \abs{x_i - 1}; \\
+u_a & = m_m - \sqrt{3}s_m,\ u_b = m_m + \sqrt{3}s_m; \\
+\mu_d &= m_d,\ \sigma_d = s_d.
+\end{align*}
+%
+Pri tem je $N$ število vseh pikslov, $x_i$ pa so vrednosti posameznih pikslov.
+%
+\subsection{Pencil Texture Rendering}
+Generiranje ustrezne strukture s svinčnikom je zahteven problem. Pri rendiranju teksture bomo uporabili naračanunano tonsko sliko in uporabili teksturo, ki se je naučimo iz dejanskih risb. zato bomo potrebovali zbirko tonskih slik. Za vsako risbo bomo sicer potrebovali le eno samo. Pri risanju človek doseže senčenje tako, da riše s svinčnikom na istem mestu. Na ta način sliko potemni. Ta proces lahko simuliramo tako, da uporabimo eksponentno obliko $H(x)^{\beta{x}} \approx J(x)$ oz.\ v logaritemski domeni to pride $\beta(x) \ln H(x) \approx \ln J(x)$. Interpretacija tega je, da teksturo $H$ na istem mestu narišemo $\beta$-krat, da dosežemo lokalno vrednost tona v $J$. Veliki $\beta$ tako pomeni, da bomo sliko bolj potemnili, medtem ko majhen $\beta$ pomeni, da bomo sliko ohranili bolj svetlo. Zahtevamo tudi, da je $\beta$ lokalno gladka. $\beta$ je rešitev enačbe
+% TODO argmin mora biti tako, da je narazen, pa da je beta spodi pod min
+$$\beta^* = \argmin_\beta \norm{\beta \ln H - \ln J}_2^2 + \lambda \norm{\Delta \beta}_2^2,$$
+kjer je $\lambda$ utež z vrednostjo $0.2$ v našem poksusu (njihovem). Zgornjo enačbo lahko pretvorimo v linearno obliko, ki jo lahko rešimo s pomočjo konjugiranih gradientov (conjugate gradient).
+
+Končno teksturo $T$ izračunamo s pomočjo eksponentne funkcije kot $T = H^{\beta^*}$.
+
+Končno risbo dobimo tako, da pomnožimo to teksturo z linijami iz prejšnjega poglavja: $R = S \cdot T$. Pri tem gre za množenje po komponentah.
+%%
+\section{Color Pencil Drawing}
+Pretvorimo v YUV barvni prostor in uporabimo $R$ namesto kanala $Y$. Potem pa zopet pretvorimo nazaj v RGB barvni prostor.

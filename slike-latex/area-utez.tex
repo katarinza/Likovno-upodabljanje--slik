@@ -1,0 +1,19 @@
+\documentclass{minimal}
+\usepackage{tikz}
+\usepackage[active, pdftex, tightpage]{preview}
+\usetikzlibrary{decorations.markings,arrows}
+\PreviewEnvironment{figure}
+\setlength\oddsidemargin{0in}
+%
+\begin{document}
+% profil zašiljen
+\begin{figure}
+\begin{tikzpicture}
+    \node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[width=5cm]{area.png}};
+    \begin{scope}[x={(image.south east)},y={(image.north west)}]
+        \draw[red,ultra thick] (2.5cm, 2.5cm) circle (2.5cm);
+    \end{scope}
+\end{tikzpicture}
+\end{figure}
+%
+\end{document}

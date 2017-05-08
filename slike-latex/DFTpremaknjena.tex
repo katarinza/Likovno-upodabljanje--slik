@@ -1,0 +1,30 @@
+\documentclass{minimal}
+\usepackage{tikz}
+\usepackage[active, pdftex, tightpage]{preview}
+\usetikzlibrary{decorations.markings,arrows}
+\PreviewEnvironment{figure}
+\setlength\oddsidemargin{0in}
+%
+\begin{document}
+% slika 1
+\begin{figure}
+\begin{tikzpicture}
+% območja
+\draw [fill=blue!40] (2,1.5) rectangle (6,4.5);
+% koordinatne osi
+\node [] (A) at (4, 0) {};
+\node [] (B) at (4, 6) {};
+\node [] (C) at (0, 3) {};
+\node [] (D) at (8, 3) {};
+\draw[postaction={decorate,decoration={markings,mark=at position 1 with {\arrow[black,line width=1.5pt]{>}}}}](B)--(A);
+\draw[postaction={decorate,decoration={markings,mark=at position 1 with {\arrow[black,line width=1.5pt]{>}}}}](C)--(D);
+% oznake območij
+\node [below right] at (2,4.5) {VF};
+\node [below left] at (6,4.5) {VF};
+\node [above right] at (2,1.5) {VF};
+\node [above left] at (6,1.5) {VF};
+\node [] at (4,3) {NF};
+\end{tikzpicture}
+\end{figure}
+%
+\end{document}

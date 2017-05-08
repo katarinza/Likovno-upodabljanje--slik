@@ -1,0 +1,39 @@
+\documentclass{minimal}
+\usepackage{tikz}
+\usepackage[active, pdftex, tightpage]{preview}
+\usetikzlibrary{decorations.markings,arrows}
+\usepackage{calrsfs}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\PreviewEnvironment{figure}
+\setlength\oddsidemargin{0in}
+
+\newcommand{\F}{\pazocal{F}}
+%
+\begin{document}
+% metulj - diagram
+\begin{figure}
+\begin{tikzpicture}
+%
+\node[label=left:$\F(v)(m)$] (A) at (0,0) {};
+\node[circle,fill,black,scale=0.4] (B) at (5,0) {};
+\node[label=below:$+$,circle,fill,black,scale=0.4] (C) at (10,0) {};
+\node[label=right:$\F(z)(m+M)$] (D) at (15,0) {};
+\node[label=left:$\F(u)(m)$] (A2) at (0,3) {};
+\node[circle,fill,black,scale=0.4] (B2) at (5,3) {};
+\node[label=above:$+$,circle,fill,black,scale=0.4] (C2) at (10,3) {};
+\node[label=right:$\F(z)(m)$] (D2) at (15,3) {};
+\node[label=below:$\cdot\ e^{-{2\pi\imath m}/{N}}$] at (2.5,0) {};
+\node[label=below:$\cdot\ (-1)$] at (7.5,0) {};
+\draw[postaction={decorate,decoration={markings,mark=at position 0.5 with {\arrow[black,line width=1.5pt]{>}}}}](A)--(B);
+\draw[postaction={decorate,decoration={markings,mark=at position 0.5 with {\arrow[black,line width=1.5pt]{>}}}}](A2)--(B2);
+\draw[postaction={decorate,decoration={markings,mark=at position 0.5 with {\arrow[blue,line width=1.5pt]{>}}}},blue](B)--(C);
+\draw[postaction={decorate,decoration={markings,mark=at position 0.5 with {\arrow[blue,line width=1.5pt]{>}}}},blue](B2)--(C2);
+\draw[postaction={decorate,decoration={markings,mark=at position 1 with {\arrow[black,line width=1.5pt]{>}}}}](C)--(D);
+\draw[postaction={decorate,decoration={markings,mark=at position 1 with {\arrow[black,line width=1.5pt]{>}}}}](C2)--(D2);
+\draw[postaction={decorate,decoration={markings,mark=at position 0.25 with {\arrow[blue,line width=1.5pt]{>}},mark=at position 0.75 with {\arrow[blue,line width=1.5pt]{>}}}},blue](B)--(C2);
+\draw[postaction={decorate,decoration={markings,mark=at position 0.25 with {\arrow[blue,line width=1.5pt]{>}},mark=at position 0.75 with {\arrow[blue,line width=1.5pt]{>}}}},blue](B2)--(C);
+%
+\end{tikzpicture}
+\end{figure}
+%
+\end{document}

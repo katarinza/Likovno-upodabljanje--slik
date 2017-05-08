@@ -1,0 +1,25 @@
+\select@language {slovene}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {1.1}{\ignorespaces To je slika, ki je bla bla, narisana z bla bla, glej v bla bla, bla bla bla . BLA, BLE, BLI, BLO, BLU.}}{16}{figure.1.1}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces To\IeC {\v c}kovna transformacija.}}{34}{figure.2.1}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Lokalna transformacija.}}{35}{figure.2.2}
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Globalna transformacija.}}{36}{figure.2.3}
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Originalna DFT.}}{38}{figure.2.4}
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Iskanje novih kontrolnih to\IeC {\v c}k.}}{63}{figure.5.1}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Poteza \IeC {\v c}opi\IeC {\v c}a se za\IeC {\v c}ne v to\IeC {\v c}ki $(x_0, y_0)$ in nadaljuje v smeri $D_0$, ki je normalna na $G_0$.}}}{63}{figure.5.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {V drugi to\IeC {\v c}ki $(x_1, y_1)$ imamo dve normalni smeri na gradient: $\vartheta _1 - \frac {\pi }{2}$ in $\vartheta _1 + \frac {\pi }{2}$. Izbrali smo $D_1$, da zmanj\IeC {\v s}amo ukrivljenost krivulje.}}}{63}{figure.5.1}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Ta postopek ponavljamo pri iskanju ostalih kontrolnih to\IeC {\v c}k. Potezo \IeC {\v c}opi\IeC {\v c}a bomo upodobili kot kubi\IeC {\v c}ni $B$-zlepek s kontrolnimi to\IeC {\v c}kami $(x_i, y_i)$. Razdalja med kontrolnimi to\IeC {\v c}kami je enaka trenutnemu polmeru \IeC {\v c}opi\IeC {\v c}a.}}}{63}{figure.5.1}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {6.1}{\ignorespaces Prikaz modelov za nekatere mo\IeC {\v z}ne profile vo\IeC {\v s}\IeC {\v c}enke. Standardni profil vo\IeC {\v s}\IeC {\v c}enke je prikazan zgoraj levo. Intezitete slikovnih to\IeC {\v c}k ustrezajo vrednostim $h_{m_{i,j}}$.}}{68}{figure.6.1}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {}}}{68}{figure.6.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {}}}{68}{figure.6.1}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {}}}{68}{figure.6.1}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {}}}{68}{figure.6.1}
+\contentsline {figure}{\numberline {6.2}{\ignorespaces Prikaz modelov za nekatere mo\IeC {\v z}ne profile vo\IeC {\v s}\IeC {\v c}enke. Standardni profil vo\IeC {\v s}\IeC {\v c}enke je prikazan zgoraj levo. Intezitete slikovnih to\IeC {\v c}k ustrezajo vrednostim $h_{m_{i,j}}$.}}{68}{figure.6.2}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {}}}{68}{figure.6.2}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {}}}{68}{figure.6.2}
+\addvspace {10\p@ }
