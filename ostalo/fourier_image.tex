@@ -1,0 +1,21 @@
+\chapter{Fourierova vrsta in transformacija}
+%%% Najprej navedemo motivacijo, zakaj bomo potrebovali Four. vrste in njeno transformacijo.
+\section{Motivacija}
+Povemo, da bomo naredili Foourierovo transformaijo, ki nam prenesla funkcijo iz èasovne v frekvenèno domeno. S tem bomo nalizirali slike in deali Fourierove filtracijo. Narediš še primer, ki pokaže frekvenèno in èasovno domeno. Verjetno kakšno nihanje itd. nekaj paè ...
+%%% Predstavitev Fourierove vrste, skupaj z izreki, dokazi, lastnostmi, ...
+\section{Fourierova vrsta}
+%%%
+\section{Fourierova transformacija}
+%%%
+\section{Algoritem za FFT in inverzno FFT}
+Naredimo tudi primer. Zelo znano je nekaj z obraèanjem bitov.
+
+\section{Uporaba Fourierove transformacije in filtrov}
+Filtriranje slike $f$ s filtrom $G$ zahteva naslednje korake:
+\begin{enumerate}
+\item Predprocesiranje dane slike (npr.\ histogram equalization, ali preslikava slike v veèjo $2n\times 2^n$ tabelo na kateri uporabimo FFT, èe je to potrebno).
+\item Sliko $f$ s Fourierovo transformacijo preslikamo v sliko kompleksno $F$ v prostoru s frekvenèno domeno.
+\item Matriko $F$ po elementih množimo s simetriènim kompleksnim filtrom $G$ ($G$ dobimo s FT filtra jedra $\textup{ker} g$).
+\item Transformacija $F\circ G$ nazaj v spatial domeno, v relano $f*g$ z uporabo inverzne FFT.
+\item Naredimo še postprocessing, èe je potrebno (npr.\ èe smo v predprocesiranju sliko poveèali).
+\end{enumerate}

@@ -1,0 +1,98 @@
+\chapter{Likovna umetnost in matematika skozi zgodovino}
+%
+Zgodovinski pregled dogajanja na področju matematike in likovne umetnosti.
+
+Vprašanja:
+\begin{itemize}
+  \item Kaj vključiti noter?
+  \item Morda tko res samo pregled dogajanja, brez podrobnosti ... da se dobi občutek.
+  \item Zaključimo pri tem, ko se začne računalnik uporabljati ...
+  \item ...
+\end{itemize}
+
+%% PRIMERI GENERATIVNE UMETNOSTI
+\chapter{Primeri generativne umetnosti}
+%
+\section{Random Art}
+\section{Bogdan Soban}
+\section{Teja Krašek}
+\section{Scott Draves}
+\section{TSP}
+% Mona Lisa TSP
+% http://www.tsp.gatech.edu/data/art/index.html
+\begin{figure}[htb]
+\includegraphics[width=0.4\textwidth]{monalisacurve}
+\end{figure}
+\section{Ostali strici in tete vredni omembe}
+
+%% OPIS SLIKE
+\chapter{Opis slike}
+
+\begin{enumerate}
+  \item Slika je opisana s parametri:
+    \begin{itemize}
+      \item Sliko narišemo z neko fiksno funkcijo $f(p_1, ..., p_n)$, ki smo jo napogramirali
+      \item različni izbori parametrov $p_1, ..., p_n$ dajo različne slike
+      \item (Ali je electricsheep oz. Flame algorithm od Scott Draves-a te vrste?)
+      \item primeri: IFS fraktali, electricsheep?, ...
+    \end{itemize}
+    
+  [MATEMATIKA: IFS fraktali, geometriska konstrukcija kake lepe slikice]
+
+  \item Slika je opisana kot funkcija koordinate točke $(x,y)$:
+    \begin{itemize}
+      \item Naivno z drevesi
+      \item Kako to naredi Random art (aciklični grafi, oz. računska vezja)
+    \end{itemize}
+    
+   [MATEMATIKA: drevesa, aciklični grafi/računska vezja]
+
+  \item Slika je opisana z grafičnimi elementi (spline, poligoni, rasterji, ...) in grafičnimi operacijami (blur, sharpen, edge detect, color transform, ...)
+
+   [RAČUNALNIĹ KA GRAFIKA: kaj so tipični grafični elementi, ki jih imamo v grafičnih knjižnicah in grafičnih karticah]
+
+\item Kolaž: sliko sestavimo iz obstoječih elementov (kosov drugih slik, barve poberemo iz fotografije) ali pa vzamemo obstoječo sliko za "vodilo": fotografijo aproksimiramo z majhnim številom barvnih trikotnikov
+\end{enumerate}
+
+\chapter{Nadziranje in odkrivanje vizualnih elementov}
+
+\textbf{Diskusija:}
+\begin{enumerate}
+  \item kaj je lepa slika? (Marko Grobelnik je imel študenta, ki je analiziral, katere slike v Random Art se ljudem zdijo "lepe".)
+  \item Če naredimo Fourierovo transformacijo slike in se igramo z njo, kaj se zgodi?
+\end{enumerate}
+
+\noindent \textbf{Kaj delamo?}
+\begin{enumerate}
+  \item Kako določamo barvno shemo, kako pazimo, da so lepe barve? \\
+   Kako izmerimo, ali je barvna shema primerna? (Histogram barv)
+
+   [MATEMATIKA: barvni modeli RGB, HSV, ...]
+
+  \item Kako določamo katere grafične elemente bomo uporabljali?
+
+  \item Purpose of Image processing \\
+   The purpose of image processing is divided into 5 groups. They are:
+    \begin{enumerate}
+      \item Visualization - Observe the objects that are not visible.
+      \item Image sharpening and restoration - To create a better image.
+      \item Image retrieval - Seek for the image of interest.
+      \item Measurement of pattern  Measures various objects in an image.
+      \item Image Recognition Distinguish the objects in an image.
+    \end{enumerate}
+  \item Kako pazimo, da ni preostrih prehodov, oz. da so ravno v pravi meri?\\
+   Kako izmerimo, ali so prehodi ustrezni? (Fourier, detekcija robov)
+
+   [MATEMATIKA: polja, gradienti, detekcija robov]
+
+  \item Kako merimo/nadziramo količino "podrobnosti"?
+
+  \item Kako nadziramo/merimo količini simetričnosti in razporeditev v sliki?
+
+  \item Kako nadziramo fokusne točke in osnovne delitve slike na območja (horizont, pod njim zemlja nad njim nebo).
+
+  \item Interaktivnost: slika, ki je odvisna od vhoda v realnem času (kamera, zvok).\\
+   Kako dovolj hitro risati sliko?
+\end{enumerate}
+
+\chapter{Implementacija}

@@ -1,0 +1,12 @@
+-- 1) toèni naslov knjige za prvo poglavje (knjižnica)
+-- 2) številèenje strani (zaèetne strani ???)
+-- 3) številèenje poglavij, slik, algoritmov, itd.
+-- 4) \imath \i \ui:
+\newcommand{\iu}{{i\mkern1mu}}
+ali
+\renewcommand{\i}{\imath}
+-- 5) trapasta enaèba v dokazu na 10 strani je predolga!?
+-- 6) polpresledki pred pikami in vejcami na koncu enaèlb, ja ne ??
+-- 7) 1dft, dft, 2dft kratice preglej !!!
+-- 8) Popravi vse podnapise pri slikah itd.
+-- 9) slike narobe oznaèuje

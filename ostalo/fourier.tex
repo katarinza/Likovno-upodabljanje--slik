@@ -1,0 +1,135 @@
+%Literatura: http://www.nbu.bg/PUBLIC/IMAGES/File/departamenti/informatika/5.pdf
+% http://www.google.si/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&ved=0CCsQFjAA&url=http%3A%2F%2Fbcc.hitsz.edu.cn%2Fhomepage%2Findex.php%3Foption%3Dcom_weblinks%26view%3Dweblink%26id%3D53%26Itemid%3D60&ei=aMedUb-EDsXgtQbSt4D4Aw&usg=AFQjCNFjlSEFYpc3DVV8oXVrj3adq4SPFA&sig2=cnO2ILm1B15kDMqSsh_jsA&bvm=bv.46865395,d.Yms
+\chapter{Image processing}
+\section{Fourierova analiza slik}
+\begin{itemize}
+\item Fourierova vrsta:
+$$a_k \cos kx + b_k \sin kx$$
+\item Fourierova transformacija funkcije $f$ in inverzna Fourierova transformacija funkcije $F$:
+$$F(u) = \int_{-\infty}^{+\infty}f(x)e^{-2\pi iux}dx$$
+$$f(x) = \int_{-\infty}^{+\infty}F(u)e^{2\pi iux}du$$
+\end{itemize}
+%
+\subsection{Diskretna Fourieova transformacija}
+\begin{itemize}
+\item FT diskretne funkcije $f(x), x = 0,1,\ldots,M-1$ v eni spremenljivki:
+$$F(u) = \frac{1}{M}\sum_{x=0}^{M-1}f(x)e^{-2\pi iux/M}, u = 0,1,\ldots,M-1$$
+\item IFT diskretne funkcije $F(u), u = 0,1,\ldots,M-1$ v eni spremenljivki:
+$$f(x) = \sum_{u = 0}{M-1}F(u)e^{2\pi iux/M}, x = 0,1,\ldots,M-1$$
+\end{itemize}
+%
+\begin{opomba}
+DFT in inverzna DFT vedno obstajata.
+\end{opomba}
+%
+Primejava FT z optično prizmo kot zanimivost.
+%
+\subsection{Značilnosti, ki jih opazujemo pri FT}
+\begin{itemize}
+\item spekter FT:
+$$|F(u)| = \sqrt{R^2(u) + I^2(u)},$$
+kjer je $R$ realni del in $I$ imaginarni del;
+\item fazni zamik FT:
+$$\phi(u) = \tan{-1} \left[\frac{I(u)}{R(u)}\right];$$
+\item power spectrum of FT:
+$$P(u) = |F(u)|^2 = R^2(u) + I^2(u).$$
+\end{itemize}
+%
+\subsection{Diskretna Fourierova transformacija na sliki}
+DFT slike $f(x,y)$ velikosti $M\times N$ je
+$$F(u,v) = \frac{1}{MN}\sum_{x=0}^{M-1}\sum_{y=0}^{N-1}f(x,y)e^{-2\pi i (ux/M + vy/N)},$$
+kjer je $u = 0,1,\ldots, M-1$ in $v = 0,1,\ldots,N-1$.
+
+Inverzna DFT slike $F(u,v)$ velikosti $M\times N$ je
+$$f(x,y) = \sum_{u = 0}{M-1}\sum_{v = 0}^{N-1} F(u,v) e^{2\pi i (ux/M+vy/N)},$$
+kjer je $x = 0,1,\ldots,M-1$ in $y = 0,1,\ldots,N-1$.
+
+\begin{itemize}
+\item spekter FT:
+$$|F(u,v)| = \sqrt{R^2(u,v) + I^2(u,v)},$$
+kjer je $R$ realni del in $I$ imaginarni del;
+\item fazni zamik FT:
+$$\phi(u,v) = \tan{-1} \left[\frac{I(u,v)}{R(u,v)}\right];$$
+\item power spectrum of FT:
+$$P(u,v) = |F(u,v)|^2 = R^2(u,v) + I^2(u,v).$$
+\end{itemize}
+%
+\subsection{Značilnosti DFT}
+\begin{itemize}
+\item Koordinatno izhodišče za funkcijo $F(u,v)$ premaknemo v center frekvenčnega pravokotnika z
+$$\mathcal{F}[f(x,y)(-1)^{x+y}] = F(u-M/2,v-N/2).$$
+\item Vrednost v točki $(u,v) = (0,0)$ je ravno povprečna vrednost funkcije $f(x,y)$.
+\item V primeru, ko je $f(x,y)$ realna funkcija, za $F$ velja:
+$$F(u,v) = F^*(-u,-v).$$
+\item Spekter FT je simetričen
+$$|F(u,v)| = |F(-u,-v)|.$$ 
+\end{itemize}
+%
+\subsection{Filtriranje slike v frkvenčni domeni}
+\begin{enumerate}
+\item Centriranje transformacije: vhodno sliko pomnožimo s členom $(-1)^{x+y}$.
+\item Izračunamo DFT $F(u,v)$.
+\item Pomnožimo $F(u,v)$ s filtrom $H(u,v)$.
+\item Izračunamo inverzno DFT.
+\item Vzamemo le realni del rezultata.
+\item Pomnožimo dobljeni realni del z $(-1^{x+y})$.
+\end{enumerate}
+%
+\subsection{Filtri}
+\subsubsection{Notch filter (zareza)}
+\begin{itemize}
+\item Naredimo popravke, ki omogočajo, da je povprečna vrednost slike enaka 0.
+\item Temelji na dejstvu, da je povprečje enako $F(0,0)$.
+\item Filter:
+$$H(u,v) =
+  \begin{cases}
+    0 & \text{če} (u,v) = (M/2, N/2),\\
+   1 & \text{sicer.}
+  \end{cases}
+$$
+\end{itemize}
+%
+\subsubsection{Ideal low-pass filter (ILPF)}
+\begin{itemize}
+\item ILP filter odreže stran vse visoko-frekvenčne komponente, ki so od koordinatnega izhodišča oddaljene več kot $D_0$, če gledamo centrirano transformacijo.
+\item Filter:
+$$H(u,v) =
+  \begin{cases}
+    0 & \mbox{če} D(u,v) \leq D_0,\\
+    1 & \mbox{če} D(u,v) > D_0.
+  \end{cases}
+$$
+\item Razdalja je podana z
+$$D(u,v) = \sqrt{(u-M/2)^2 + (v-N/2)^2}.$$
+\end{itemize}
+%
+\subsubsection{Butterworth low-pass filter (BLPF)}
+\begin{itemize}
+\item Filter BLPF reda $n$ z odrezano frekvenco na razdalji $D_0$ je definiran z
+$$H(u,v) = \frac{1}{1+[D(u,v)/D_0]^{2n}}.$$
+\item Za razliko od ILPF-ja, nam BLPF ne da \lq\lq{čistih frekvenc}\rq\rq.
+\item Pri $D(u,v) = D_0$ dobimo $H(u,v) = 0.5$.
+\end{itemize}
+%
+\subsubsection{Gaussian low-pass filter (GLPF)}
+\begin{itemize}
+\item GLPF v dveh dimenzijah je enak
+$$H(u,v) = e^{-D^2(u,v)/2\sigma^2}.$$
+\item V primeru, ko je $\sigma = D_0$ dobimo:
+$$H(u,v) = e^{-D^2(u,v)/2D_0^2}.$$
+\item Inverzna DFT GLPF-ja je Gaussova.
+\end{itemize}
+%
+\subsubsection{Sharpening frequency domain filter (SFDF)}
+\begin{itemize}
+\item Popravljanje robov je v zvezi z visoko-frekvenčnimi komponentami.
+\item High-pass frequency process je v analogiji z low-pass.
+\item Zatiranje nizkih frekvenc.
+\item Filtre IHPF, BHPF in GHPF (H visoke frekvence) lahko dobimo tako: $ H_{hp}(u,v) = 1 - H_{lp}(u,v)$.
+\end{itemize}
+%
+\subsubsection{Odstranjevanje šuma}
+Literatura:
+\url{ http://en.wikipedia.org/wiki/Discrete_wavelet_transform}\\
+\url{http://people.cs.kuleuven.be/~daan.huybrechs/teaching/wavelets2011.pdf}\\
+\url{http://homepages.cae.wisc.edu/~ece533/project/f04/jacob_martin.pdf}

@@ -1,0 +1,32 @@
+\section{Fourierova vrsta}
+%Naj bo $f(\tau)$ periodična funkcija s periodo $T$, tj.\ $f(\tau + T) = f(\tau)$. Za nadaljno obravnavo bomo funkcijo $f$ z uvedbo neodvisne spremenljivke $t = \frac{2\pi}{T}\tau$ parametrizirali tako, da bo njena perioda enaka $2\pi$. Dobimo torej funkcijo $f(t)$ s periodo $2\pi$, tj.\ $f(t+2\pi) = f(t)$. Ker je funkcija periodična. lahko njeno obravnavamo skrčimo na interval dolžine $2\pi$, npr.\ interval $(-\pi, \pi)$.
+%
+%Joseph Fourier (1786-1830) je odkril, da lahko periodično funkcijo $f(t)$ zapišemo kot neskončno vsoto sinusov in kosinusov, t.~i.\ \emph{Fourierovo vrsto}
+%$$f(t) = \frac{1}{2}a_0 + \sum_{n=1}^{\infty} [a_n \cos (nt) + b_n\sin (nt)],$$
+%kjer konstantne koeficiente $a_n$ in $b_n$ imenujemo \emph{Fourierovi koeficienti} funkcije $f$.
+
+Funkcija $f(t)$ v eni spremenljivki zadošča \emph{Dirichletovim pogojem}, če velja:
+\begin{enumerate}
+\item $f(t)$ je periodična s periodo $T$, tj.\ $f(t + T) = f(t)$; 
+\item $f(t)$ ima končno mnogo točk končnih nezveznosti;
+\item $f(t)$ ima v eni periodi končno mnogo maksimumov in minimumov;
+\item integral funkcije $f(t)$ mora biti absolutno integrabilen na intervalu ene periode.
+\end{enumerate}
+%
+\begin{definicija}
+\emph{Fourierovo vrsto} periodične funkcije $f(t)$ s periodo $T$ zapišemo v obliki neskončne vsote kot
+% vrsta
+\begin{align}
+f(t) = \frac{1}{2}a_0 + \sum_{n=1}^{\infty} [a_n \cos (nt) + b_n\sin (nt)],
+\end{align}
+kjer konstantne koeficiente $a_0$, $a_n$ in $b_n$ imenujemo \emph{Fourierovi koeficienti} funkcije $f(t)$. Izračunamo jih z naslednjimi formulami ($x_0 \in \R$):
+\begin{align}
+a_0 & = \frac{2}{L}\int_{x_0}^{x_0+T}f(x) dx, \\
+a_n & = \frac{1}{2L}\int_{x_0}^{x_0+T}f(x) \cos\left(\frac{2\pi n x}{T}\right) dx, \\
+b_n & = \frac{1}{2L}\int_{x_0}^{x_0+T}f(x) \sin\left(\frac{2\pi n x}{T}\right) dx.
+\end{align}
+Za konstanto $x_0$, ki nastopa v mejah integralov, običajno vzamemo 0 ali $-\frac{T}{2}$.
+\end{definicija}
+%
+Fourierove koeficiente izpeljemo tako, da privzamemo obliko Fourierove vrste za funkcijo $f$ in jo pomnožimo \ldots
+

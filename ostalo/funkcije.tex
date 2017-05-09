@@ -1,0 +1,43 @@
+\chapter{Image Processing}
+%
+\section{Basic Image Manipulation}
+%
+\subsection{Alpha Channel}
+\subsection{Image Adjust}
+\subsection{Threshold}
+\subsection{Image Effect}
+\begin{itemize}
+\item \text{Available artistic image effects include:}
+\left(
+\begin{array}{ccc}
+ \text{      } & \{\text{Charcoal},x\} & \text{charcoal sketch effect} \\
+ \text{      } & \{\text{Embossing},x,\alpha \} & \text{embossing by an amount }x\text{ at an angle }\alpha  \\
+ \text{      } & \{\text{OilPainting},x\} & \text{artistic oil painting effect} \\
+ \text{      } & \{\text{Posterization},n\} & \text{posterization effect using }n\text{ levels in each channel} \\
+ \text{      } & \{\text{Solarization},t\} & \text{solarization or Sabatier effect} \\
+ \text{      } & \{\text{MotionBlur},d,\alpha \} & \text{motion blur of size }d\text{ and angle }\alpha \text{, given in radians} \\
+\end{array}
+\right)
+%
+\item \text{Pseudo-random noise effects:}
+\left(
+\begin{array}{ccc}
+ \text{      } & \{\text{Noise},a\} & \text{adds zero-mean uniform noise of amplitude }\frac{a}{2} \\
+ \text{      } & \{\text{GaussianNoise},\sigma \} & \text{adds zero-mean Gaussian noise with standard deviation }\sigma  \\
+ \text{      } & \{\text{SaltPepperNoise},f\} & \text{adds salt-and-pepper noise to a fraction }f\text{ of the image} \\
+ \text{      } & \{\text{PoissonNoise},a\} & \text{adds an amount }a\text{ of Poisson noise} \\
+\end{array}
+\right)
+\end{itemize}
+\subsection{Blur}
+\subsection{Sharpen}
+\subsection{StainedGlass}
+example/CreateAStainedGlassEffectOnAnImage
+\subsection{Sketch Filter}
+%http://www.gimp.org/tutorials/Sketch_Effect/
+\begin{itemize}
+\item High pass filtering: Odstranimo nizke frekvence na sliki. S tem ohranimo podrobnosti na sliki, odstranimo pa veèje skalirane gradiente. Uporabimo Gaussian Blur z 7 piksli širine.
+
+Image colors invert. To blend the to, layer 50\%. Združli smo dve sliki na ta naèin.
+Morda nastavimo kontrast.
+\end{itemize}
