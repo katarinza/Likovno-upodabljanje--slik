@@ -10,3 +10,94 @@ ali
 -- 7) 1dft, dft, 2dft kratice preglej !!!
 -- 8) Popravi vse podnapise pri slikah itd.
 -- 9) slike narobe oznaèuje
+
+
+\chapter{Bojni naèrt no.\ 1}
+
+Tu notri se zaenkrat zbira informacije o tem, kaj bi napisalai in kaj smo že napisali.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Uvodno poglavje}
+Pojasnimo vlogo matematike in raèunalnika v likovni umetnosti. Kakšna je pravzaprav vloga raæunalnika \ldots
+
+Spodobi se predstaviti nekaj zgodovinskega ozadja na to tematiko:
+\begin{enumerate}
+  \item Zgodovinski pregled (seveda tudi dandanašnji) ``ustvarjanja na papir". Npr.\ stric Escher. Mišljen je predvsem kratek povzetek, ki pa je bogat z viri in primeri.
+  \item \emph{Risanje lepih slik s pomoèjo raèunalniških algoritmov prinese novo zadovoljstvo.}
+  \item Rišemo lahko fraktale. To omenimo in pustimo nato na stranskem tiru, saj smo se s tem že ukvarjali. Seveda ne pozabimo dati referenece za \emph{electric sheep}.
+  \item S pomoèjo raèunalnika in obstojèih raznoraznih programov se da ustvariti èudovite slike in videje (to poène npr.\ Teja).
+  \item Random Art, tralala \ldots
+  \item Image processing.
+  \item Non-photorealistic rendering.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Barve}
+Predstavitev barvnih modelov in prostorov (RGB, HSV, CMYK, \ldots).
+
+Barvne sheme, histogrami, \ldots (opis in kako si z njimi lahko pomagamo). NPr.\ pri risanju je zelo pomembno, da ima raèunalnik na voljo paleto barv, ki jih dejansko slikar ali risar lahko uporabljata.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Prepoznavanje doloèenih oblik in motenj na dani sliki}
+Algoritmi in orodja za iskanje doloèenih vizualnih oblik na dani sliki oz.\ fotografiji.
+
+Kaj vse lahko išèemo?
+\begin{enumerate}
+  \item Linije.
+  \item Prehodi med barvami.
+  \item Zaznava obraza na fotografiji.
+  \item Vektorska polja.
+  \item \ldots 
+\end{enumerate}
+
+\textit{Kako to storimo?} Edge detection: Odvisno od stila in vrste risanja. Nekje bomo želeli dobiti kratke èrtice, drugje bi radi zvezne daljše linije (s katerimi lahko nato eksperimentiramo in na ta naèin proizvedemo random art na podlagi dane fotografije).
+
+\textit{Prisotnost šumov na fotografijah:} Šumi na fotografiji so nadležna stvar. V tej smeri lahko postorimo nekaj stvari. Šuma na sliki se znebimo (Fourierova transformacija) ali pa se trudimo napisati èim bolj robustne algoritme, ``odporne" na motnje.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Image processing}
+ustvarimo lahko dolèene filtre (uporaba konvolucijskih jeder) za ustvarjanje. Predstavitev nekaterih filtrov in njihovo delovanje.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Non-photorealistic rendering (NPR)}
+NPR lahko razdelimo v dve skupini:
+\begin{enumerate}
+  \item geomatry-based NPR;
+  \item image-based NPR.
+\end{enumerate}
+NPR no.\ 1 dobi kot vhod 3D opis, medtem ko NPR no.\ 2 dobi 2D sliko (dobimo podatke za posamezen piksel, brez vsakršne informacije o 3D strukturi). Slednje je veliko težje, saj mora raèunalnik informacije o linijah, robovih, senèenju, itd.\ pridobiti sam na podlagi dane fotografije.
+
+Na podlagi dane fotografije bi radi poustvarili doloèen slikarski oz.\ risarski stil. Naštejmo nekaj od teh stilov:
+\begin{enumerate}
+  \item halftone;
+  \item pen-and-in illustrations;
+  \item watercolor paintings;
+  \item oil paintings;
+  \item impressionist paintings;
+  \item pencil sketches:
+    \begin{itemize}
+      \item sketch;
+      \item hatcinhg. 
+    \end{itemize}
+\end{enumerate}
+
+Za vsak posamezen stil veljajo doloèena pravila, ki se jih slikarji in risarji držijo. Raèunalnik mora torej pri vsakem posamezenem stilu upoštevati ista pravila. Poleg teh pa je potrebno upoštevati še ostale zakonitosti:
+\begin{enumerate}
+  \item barvne palete, ki jih slikar ali risar uporabljata (kakšne barve sta sposobna sproducirati);
+  \item upoštevati je potrebno podlago na katero slikar ali risar rišeta;
+  \item upoštevati je treba strukturo linij, ki jih èopièi in svinèniki proizvedejo (npr.\ pri risanju s svinènikom ne bomo dobili polne èrte, \ldots);
+  \item \ldots
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Kaj bomo naprogramirali ?}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{}
