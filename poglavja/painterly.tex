@@ -1,0 +1,682 @@
+\chapter{Likovno upodabljanje s potezami}
+%
+Likovno upodabljanje s potezami (\emph{kratica} LUP) je skupni pojem za skupino likovnih upodabljanj slik pri katerih na risalno podlago (platno) na predpisan način postavljamo diskretne elemente. Ti so lahko npr.~poteze čopiča, pike, trikotniki in kvadratki ali tudi mozaične ploščice (skupno ime za vse te elemente bo kar poteze).
+
+Algoritmi, ki jih bomo uporabili za LUP, bodo večinoma potekali v dveh fazah. V prvi fazi bomo postavili poteze na platno, nato pa bomo v drugi fazi poteze na platnu upodobili, s čemer bomo dosegli likovno dodelano sliko. Skupni cilj pri LUP je upodobitev slike, ki bo imela določen slikarski stil, bo po stilu podobna znanemu stilu nekega slikarja ali pa imela povsem abstrakten aspekt. Postavitev potez na platno je običajno taka, da je slika čimbolj podobna fotografiji. Slednje enostavno dosežemo tako, da na platnu upodobimo % TODO na platnu ali na platno?
+ogromno majhnih potez. Na ta način bomo dobili zelo dobro ujemanje s fotografijo, lahko pa tudi pridobili nezaželen učinek umetnega videza in izgubili abstraktnost in likovnost slike. Zato bomo pri algoritmih zahtevali še omejitev števila potez, njihove oblike, velikosti in barve.
+
+Prav tako kot je to storil Hertzmann v~\cite{Hertzmann}, % TODO CITIRAJ UN ČLANEK K JE VSE NOTER OD hERTZMANNA
+bomo tudi mi razdelili LUP v dve glavni skupini. V prvem razdelku tega poglavja bomo opisali skupino LUP, pri katerih obliko, velikost, barvo in položaj poteze na platnu določimo po vnaprej določenem pravilu. Za upodabljanje bomo uporabljali požrešno metodo in razvili naraven pristop k slikanju. Druga skupina algoritmov pa uporablja optimizacijske metode. Te bomo opisali v drugem razdelku in videli, da z njimi lahko izboljšamo kakovost slike, vendar pa veliko izgubimo na časovni zahtevnosti. Predstavili bomo tudi mozaike, za katere je optimizacijski pristop naraven način likovnega upodabljanja. V zadnjem razdelku pa bomo predstavili naše implementacije nekaterih algoritmov in naredili njihovo kratko analizo skupaj s primeri. 
+%%
+\section{Požrešne metode}
+Požrešne metode so najbolj običajni algoritmi s katerimi slikamo. Strokese dodamo na strukturo slike in jih po tem ne spreminjamo več, kot smo to storili pri optimizacijskih algoritmih. Pri tej vrsti lagoritma nimamo energijske funkcije, ki bi dolačala stil slike, temveč moramo na pravi način postaviti strokese na strukturo slike. Seveda lahko zapišemo energijsko funkcijo, ki je naravna.
+
+Dve glavni vprašanji, ki ju imamo pri požrešni metodi slikanja, sta:
+%
+\begin{enumerate}
+\item Kam postavimo strokese?
+\item Kakšno obliko in barvo bodo imeli strokesi?
+\end{enumerate}
+%
+Pogledali si bomo različne vrste postavljanja strokesov na platno:
+%
+\begin{enumerate}
+\item ravni strokesi (enoplastno, večplastno);
+\item Bezierovi strokesi.
+\end{enumerate}
+%
+\subsection{Slikanje z ravnimi potezami}
+\subsubsection{Generiranje potez}
+Privzemimo, da je vsaka poteza čopiča renderirana z antialiazirano črto s centrom v $(cx, cy)$, dano dolžino $l$, debelino čopiča $R$ in orientacijo $\theta$. Privzemimo, da so poteze čopiča generirane s centri v $(cx, cy)$ na mreži slike, ki ima v $x$ in $y$ smeri stolpce in vrstice narazen za dve slikovni točki. Na ta način zagotovimo, da bo celotno platno prekrito z barvo oz.\ potezami čopiča. V praksi uporabniku dovolimo, da nastavi razdalje. Na začetku bomo privzeli, da je orientacija konstantna, izbrali bomo $45 \circ$. Barva poteze je izbrana tako, da bilinearno interpoliramo barvno na vhodni sliki na točko $(cx, cy)$ (imamo bravno lestvico $[0, 255]$). Poteze čopiča narišemo v naključnem vrstnem redu, da se izogmnemo regularnosti in pridobimo večji občutek naravnega procesa slikanja.
+%
+\subsubsection{Naključne perturbacije}
+Dodajanje naključnih perturbacij k parametrom poteze, pomaga pri občutku, da je poteza narisana ročno. Naključnost dolžine in debeline poteze čopiča dosežemo s tem, da uporabnik za dolžino in debelino poteze čopiča predpiše interval dovoljenih vrednosti. barvo perturbiramo tako, da komponentam RGB dodamo vrednosti $\Delta r, \Delta g$ in $\Delta b$ iz intervala $[-15, 15]$. Perturbirano barvo nato skaliramo z naključno vrednostjo $\Delta inteziteta$ iz intervala $[0.85, 1.15]$. Potem, ko dobimo končno perturbirano barvo, jo preslikamo nazaj na interval $[0, 255]$. Perturbiramo tudi orientacijo poteze, tako da orientaciji dodamo naključno vrednost iz intervala $[-15 \circ, 15 \circ]$.
+%
+\begin{opomba}
+Dovoljene vrednosti za perturbacijo so izbrane na podlagi empiričnih poskusov.
+\end{opomba}
+%
+\subsubsection{Rezanje in upodabljanje potez čopiča}
+Potezo čopiča upodobimo tako, da narišemo antialiazirano črto skozi predpisan center v določeni orientaciji. Ker želimo ohraniti detajle in oblike na vhodni sliki, poteze čopiča porežemo pri sekanju z robovi na vhodni sliki. Na ta način se robovi na vhodni sliki bolj ali manj ohranijo. To dosežemo tako, da pričnemo v centru poteze in potezo rišemo toliko časa, dokler ta ne seka roba na vhodni sliki.
+
+Algoritem za opis rezanja potez čopiča in njihovega upodabljanja:
+%
+\begin{enumerate}
+  \item Iz prvotne vhodne slike izračunamo matriko, v kateri za posamezno slikovno točko hranimo njeno inteziteto. Inteziteto za slikovno točko, ki ima komponente RGB na intervalu $[0, 255]$, izračunamo njeno inteziteto s formulo:
+$\frac{30\cdot r + 59 \cdot g + 11\cdot b}{100}$.
+  \item Dobljeno sliko $I$ sedaj zameglimo z uporabo Gaussovega filtra. S tem filtrom na sliki zmanjšamo šum. Večji filter bo odstranil šum, vendar pa bo pri tem zameglil tudi detajle in robove na vhodni sliki. Manjši filtri pa bodo detajle in robove bolje ohranili, vendar ne bomo na ta način odstranili neželjenega šuma na sliki. Namesto Gaussovega filtra, lahko uporabimo aproksimacijo z $B$-zlepki. Uporabniku dovolimo, da nastavi ustrezne parametre.
+  \item Dobljeno zamegljeno sliko sedaj filtriramo s Sobelovim filtrom. Za vsako slikovno točko izračunamo gradient $(G_x, G_y)$ in dobimo vrednost Sobelovega filtra za to slikovno točko kot
+$Sobel(x, y) = Magnitude(G_x, G_y)$.
+Dobimo novo sliko $S$.
+  \item Za dani center $(c_x, c_y)$, orientacijo poteze $\theta$ in filtrirane slike $S$, moramo sedaj izračunati še začetno in končno točko poteze ($(x_1, y_1)$ in $(x_2, y_2)$). Postopek pričnemo v centru $(c_x, c_y)$ in rišemo potezo v določeni smeri, dokler ne dosežemo največje dovoljene dolžine ali pa sekamo rob na sliki $S$. Rob na sliki je bil najden, če vrednost graideinta oz.\ vrednost na sliki $S$ pade v smeri risanja poteze. V algoritmu \ref{alg:clipping} je prikazana psevdokoda za postopek iskanja začetne in končne točke poteze.
+%
+\begin{algorithm}
+  \caption{Iskanje začetne in končne točke poteze. Center poteze je dan s točko $(c_x, c_y)$, smer pa je dana z $d_x, d_y$. Izhodni podatki algoritma sta začetna in končna točka ($(x_1, y_1)$ in $(x_2, y_2)$. Filtrirano sliko $S$ pregledamo v enotskih korakih dokler ne sekamo roba ali dosežemo največje dolžine poteze. Spodnji postopek je prikaz za iskanje enega konca poteze. Za vsak konec namreč moramo iti v nasprotnih smereh pri risanju. Za iskanje točke $(x_2, y_2)$ moramo tako nastaviti smer na $(d_x, d_y) = (-d_x, -d_y)$.}
+  \label{alg:clipping}
+\begin{algorithmic}[1]
+  \State $(x_i, y_i)$ $\leftarrow$ $(c_x, c_y)$
+  \State $vred$ $\leftarrow$ bilinearna vrednost filtrirane vrednosti slike $S$ v točki $(x_i, y_i)$
+  \State $(x_t, y_t)$ $\leftarrow$ $(x_i + d_x, y_i + d_y)$
+  \If {$d((x_i, y_i), (x_t, y_t)) > \frac{l}{2}$}
+    \State $stop$
+  \EndIf
+  \State $vred_n$ $\leftarrow$ bilinearna vrednost filtrirane vrednosti slike $S$ v točki $(x_t, y_t)$
+  \If {$vred_n < vred$}
+    \State $stop$
+  \EndIf
+  \State $(x_i, y_i)$ $\leftarrow$ $x_t, y_t$
+  \State $vred$ $\leftarrow$ $vred_n$
+  \State $goto\ 3$ 
+\end{algorithmic}
+\end{algorithm}
+%
+  \item Potezo čopiča upodobimo z izračunano začetno in končno točko. Za barvo poteze izberemo kar barvo slikovne točke s koordinatami $(c_x, c_y)$ na vhodni sliki. Perturbirati moramo barvo, parametre za perturbacijo imamo shranjene. Poteze upodobimo z antialiazirano črto, i ima okrog območje linearnega padca debeline slikovne pike in spremeni prosojnost od 1 do 0. Pri upodabljanju poteze poskrbimo tudi za to, da narisana črta ni čisto točno odrezana pri koncu, temveč gre nekoliko preko robnih točk. Na ta nain dosežemo boljši učinek ročno narisane črte. Na koncih črte lahko po želji narišemo tudi krogec, da dobimo črto, ki je na koncih zaobljena ali pa pustimo ravno odrezano črto.
+\end{enumerate}
+%
+\subsubsection{Tekstura čopiča}
+Poteze čopiča lahko upodabljamo tudi s pomočjo teksture, tj.\ vzorca, ki vsebuje informacije o komponentah RGB in prosojnosti (alfa komponenta). Predpišemo padec, ki je odvisen od padca pri risanju antialiazirane črte, in ustvarimo pravokotnik, ki pokriva antialiazirano črto. Teksturo poteze čopiča preslikamo na ta pravokotnik. Posamezne barve na potezi čopča pomnožimo s temi barvami, ki so na teksturi poteze čopiča.
+% TODO Skica.
+\subsubsection{Usmerjenost potez čopiča}
+Namesto predpisane orientacije poteze bomo izračunali orientacijo, ki bo sovpadala z linijami na slikami. Poteze tako rišemo v smeri konstantne ali skoraj konstantne barve. To orientacijo lahko aproksimiramo tako, da rišemo poteze v smeri normale na gradient slike $I$. Namreč, gradient nam pove v kateri smeri se slika najbolj spremeni, normala na gradient je torej smer v kateri se ne spremeni slika. Upoštevajoč to informacijo, pričakujemo, da lahko sliko lokalno avtomatično aproksimiramo z realtivno kratkimi potezami konstantne barve v smeri normale na gradient.
+
+Eksperimentalno se izkaže, da uporaba istega Gaussovega filtra za detekcijo robov na sliki in zamegljenje slike za računanje gradienta ni optimalno. Izračunani gradient namreč ni bil dovolj gladek. Za izračun orientacije zato uporabimo večji Gaussov filter: uporabili so Gaussov filter, ki je bil za 4 slikovne pike večji od filtra za določanje robov.
+
+Kakorkoli, v primeru, ko je magnituda gradienta blizu 0, se ne moremo zanesti na to, da bi bila določena smer uporabna. Zato uporabimo novo tehniko, ki spremeni gradientno polje tako, da poteze čopiča v območjih slike s konstantno ali skoraj konstsntno barvo gladko interpolirajo smeri, ki jih določajo robovi tega območja.
+
+Najprej izločimo vrednosti gradienta na sliki, za katere velja, da je $Mag(G_x, G_y)$ blizu 0; primerna izbira je, da ven izločimo tiste gradiente, za katere velja $\abs{G_x} < 0.3$ in $\abs{G_y} < 0.3$. Izločene gradiente moramo sedaj nadomestiti z novimi vrednostmi, ki bodo dale zadovoljivo smer. To storimo tako, da interpoliramo okoliške vrednosti, ki so dobre. Ker pa dobre vrednosti ne ležijo nujno na mreži, ne moremo uporabiti kubične interpolacije na teh točkah. Zato potrebujemo interpolant, ki ne bo zahteval enakomerne razporeditve podatkov v $x$ in $y$ smereh. Uporabimo lahko interpolacijo s tankoploskovnim filtrom \ref{Franke79}.
+
+Končno, za vsak center $(c_x, c_y)$ poračunamo vrednosti gradienta s kubično interpolacijo. Kot poda katerim narišemo potezo, izračunamo z $\arctan(\frac{G_y}{G_x}) + 90\circ$. Slednje kote nato še perturbiramo. Uporaba normale na gradient nam da efekt, da so poteze čopiča prilepljene na objekt.
+% TODO Videjo.
+%%
+\subsection{Slikanje z Beizerovimi krivuljami}
+\subsubsection{Spreminjanje velikosti čopičev}
+Pogosto slikarji slikasjo tako, da najprej z debelejšim čopič naredijo grobo skico, nato pa z vedno manjšimi čopiči dodajo podrobnosti nas liko in delajo potrebne popravke. Čeprav ta postopek nima motivacije, ki bi bila vezana na računalniške algoritme, pa nam vrača estetsko primerne rezultate. Slikar tako lahko npr.\ uporablja drugčno tehniko, debelino čopiča \ldots, da naslika različne elemente na sliki (npr.\ zajčki na jasi). Uporaba potez iste oblike in barve na konstantnih območjih slike povzročijo to, da izgleda to območje umetno. V izogib temu slikar preko že narisanih potez, naslika manjše poteze, ki razgibajo sliko in poudarijo podrobnosti na sliki, ki jih slikar želi izpostaviti. Pri našemu postopku slikanja bomo z manjšim čopičem slikali le tam, kjer bo potrebno in ne povsod. Algoritem, ki ga bomo uporabljali je podoben piramidnemu algoritmu \ref{3}, pri katerem pričnemo z grobo skico in nato dodajamo detajle z vedno manjšimi čopiči. Algoritem, ki ga bomo izpeljali, v resnici temelji na Laplaceovi piramidi: diferenčna slika $L_i$ določa položaje potez čopiča. Kakorkoli, diferenčna slika predvidi popolno rekonstrukcijo na nižjih ravneh piramide, naša rekonstrukcija pa je namerno nepopolna. Zato popravki na višjih ravneh povzročijo nezaželene artefakte. Algoritem, ki ga bomo predstavili, se temu problemu izogne tako, da diferenčno sliko izračuna na novo vsakič, ko uporabimo novo debelino čopiča.
+
+Algoritem za vhodne podatke dobi sliko in seznam debelin čopiča. Debeline čopičev določimo z njihovimi polmeri $R_i$. Algoritem nato prične s slikanjem posameznih plasti, za vsak polmer čopiča svojo. Plasti barvamo od najdebelješega čopiča proti najtanjšemu. Osnovna plast je platno, pobarvano s konstantno barvo \footnote{Platno ima lahko teksturo.}.
+
+Za vsako plast $P_i$ najprej ustvarimo referenčno sliko, ki jo dobimo tako, da zameglimo vhodno sliko (Gaussov filter s standardnim odklonom $f_{\sigma} R_i$), kjer je $f_{\sigma}$ vnaprej določen parameter. Referenčna slika je sedaj slika, ki jo želimo čimbolje aproksimirati s čopičem trenutne velikosti. S tem, ko smo sliko zameglili, smo predpisali kako natančno želimo pobarvati sliko na tem nivoju. Ideja je v tem, da s posamezo velikostjo čopiča naslikamo podrobnosti, ki so v približni treutni velikosti čopiča. Za posamezno plast uporabimo vsakič isti algoritem, ki na podlagi trenutne diferenčne slike, doda tiste poteze čopiča, kjer aproksimacija za trenutno velikost ni zadovoljiva. Območja, ki se z referenčno sliko dovolj ujemajo (to nadzorujemo s parametrom $T$), ne spreminjamo več. S pomočjo parametra lahko dobimo bolj grobe slike (velik $T$) ali pa bolj fine (majhen $T$). V algoritmu \ref{alg:paintOsnovni} je povzeta psevdokoda ogrodja za algoritem.
+
+\begin{algorithm}[htb]
+  \caption{Glavni algoritem.}
+  \label{alg:paintOsnovni}
+\begin{algorithmic}[1]
+\Require bla bla
+\Ensure tralalal
+\Function {Slikanje} {$S$, $[R_1, \ldots, R_n]$}
+  \State $P$ $\leftarrow$ pobarvamo z izbrano barvo
+  \For {$R_1, R_2 \ldots R_n$}
+    \State $G$ $\leftarrow$ $S \ast G(f_{\sigma} R_i)$
+    \State \Call {PobarvajPlast} {$P$, $G$, $R_i$}
+  \EndFor
+  \State \Return $P$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+%
+Prvo plast v točki $2.$ pobarvamo z barvo $C$; razlika med barvo $C$ in katerokoli drugo barvo mora biti maksimalna. Vsako posamezno plast pobarvamo s preprosto zanko preko celotne slike. Postopek je podoben temu v \ref{11}, pri katerem smo poteze čopiča razporedili enakomerno na mreži. Na tak način lahko zgrešimo robove in detajle med dvema zaporednima točkama na mreži. Pri našem algoritmu bomo zato naredili izboljšavo, ki bo namesto, da bi uporabila točko na mreži za center poteze, pregledala celotno okolico centra in poiskala točko v kateri je napaka največja. Vse poteze čopiča najprej določimo in jih šele nato, ko imamo vse določene renderiramo v izbranem vrstnem redu. Z naključno izbranim vrstnim redom se npr.\ lahko izognemo regularnosti. V algoritmu \ref{alg:paintLayer} je povzeta psevdokoda za ta algoritem.
+% TODO glej še P2 stran 15, ko govori o hitrosti v Cro84
+
+\begin{algorithm}[htb]
+  \caption{Pobarvaj plast.}
+  \label{alg:paintLayer}
+\begin{algorithmic}[1]
+\Require $P$, $G$, $R$
+\Ensure Platno z na novo upodobljenimi potezami čopiča.
+\Function {PobarvajPlast} {$P$, $G$, $R$}
+  \State $S$ $\leftarrow$ nova množica potez
+  \State $D$ $\leftarrow$ \Call {DiferenčnaSlika} {$P$, $G$}
+  \State $g$ $\leftarrow$ $f_{\sigma} R$
+  \State $x$ $\leftarrow$ $0$
+  \While {$x < \textup{širina slike}$}
+    \State $y$ $\leftarrow$ $0$
+    \While {$y < \textup{višina slike}$}
+      \State $M$ $\leftarrow$ $regija(x - g/2, x + g/2, y - g/2, y + g/2)$
+      \State $napaka$ $\leftarrow$ ${(\sum_{i, j \in M} D_{i, j})}/{g^2}$
+      \State $y$ $\leftarrow$ $y + g$
+      \If {$napaka > T$}
+        \State $(x_m, y_m)$ $\leftarrow$ $\argmax_{i, j \in M} D_{i, j}$
+        \State $s$ $\leftarrow$ \Call {Poteza} {$x_m$, $y_m$, $R$, $G$}
+        \State dodaj $s$ množici potez $S$
+      \EndIf
+    \EndWhile
+    \State $x$ $\leftarrow$ $x + g$
+  \EndWhile
+  \State V izbranem vrstnem redu upodobi vse poteze $s \in S$ na platno $P$.
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+%
+V praksi ne bomo shranjevali seznama vseh potez, ki ga na kocu naključno premešamo ali pa mu določimo kateri drugi vrstni red, temveč lahko uporabimo t.\ i.\ $Z$-buffer. % TODO stran z 2.2
+%%
+\subsubsection{Ustvarjanje novih potez s čopičem}
+Individualne poteze čopiča na sliki imajo lahko svojo obliko, barvo, teksturo \ldots V nadaljevanju bomo predstavili način za generiranje dolgih ukrivljenih potez. Poteze čopiča bomo modelirali s pomočjo antializiranih $B$-kubičnih zlepkov, vsak s svojo barvo in debelino. Potezo čopiča upodobimo s krožno masko, ki jo vlečemo vzdolž $B$-zlepka.
+
+Poiskati moramo kontrolne točke za Bezierovo krivuljo. pričnemo v točki $(x_0, y_0)$. Izbrani polmer čopiča je $R$. Potezo čopiča predstavimo s seznamom kontrolnih točk, barvo in debelino poteze.
+
+Kontrolno točko $(x_0, y_0)$ dodamo praznemu seznamu kontrolnih točk; barva poteze nastavimo na barvo slikovne točke $(x_0, y_0)$ na referenčni sliki. Nato izračunamo naslednnjo točko vzdolž krivulje. Gradient $\Theta_0$ v tej točki izračunamo iz Sobelovo filtrirane referenčne slike, ki smo jo predhodno iluminirali ($L(r, g, b) = 0.3*r + 0.59*g + 0.11*b$). Naslednjo točko $(x_1, y_1)$ postavimo v smeri $\Theta_0 + \frac{\pi}{2}$ na razdalji $R$ od $(x_0, y_0)$. Poler čopiča $R$ uporabljamo za razdaljo med kontrolnimi točkami, ker polmer $R$ reprezentira količino podrobnosti, ki jo bomo zaobjeli s čopičem. Preostale kontrolne točke poračunamo po istem postopku. Proces iskanja novih kontrolnih točk prekinemo v naslednjih dveh primerih:
+%
+\begin{enumerate}
+  \item dosegli smo maksimalno število kontrolnih točk ($l_{max}$);
+  \item barva kontrolne točke se od barve poteze razlikuje bolj kot od trenutne barve na platnu.
+\end{enumerate}
+%
+Z zaustavitvenim pogojem dolžine, se izognemu morebitni neskočni zanki. Za točko $(x_i, y_i)$ izračunamo gradient v tej točki, $\Theta_i$. Opazimo, da v tej točki, obstajajo dve normali na to točko, vsaka v svojo smer: $\theta_i + \frac{\pi}{2}$ in $\theta_i - \frac{\pi}{2}$. Izbereamo tisto smer normale, ki minimizira ukrivljenost poteze: izberemo smer $D_i$, za katero velja $\alpha(D_i, D_{i-1}) < \frac{\pi}{2}$.
+
+\begin{figure}[htbp]
+%
+  \subfigure[Poteza čopiča se začne v točki $(x_0, y_0)$ in nadaljuje v smeri $D_0$, ki je normalna na $G_0$.]{
+  \begin{tikzpicture}[scale=0.65]
+  % koordinate
+  \coordinate (A) at (0, 0);
+  \coordinate (B) at (2, 2);
+  \coordinate (C) at (-2, 2);
+  % vektorji
+  \draw [-latex, black, thick, >=] (A) -- (B);
+  \draw [-latex, black, thick, >=] (A) -- (C);
+  % črte
+  \draw [dashed] (0, 0) -- (3, 0);
+  \draw [domain=0:45] plot ({1.5*cos(\x)}, {1.5*sin(\x)});
+  \draw (0.25, 0.25) -- (0, 0.5) -- (-0.25, 0.25);
+  % oznake
+  \draw [fill=black] (A) circle (2pt) node [below] {$(x_0, y_0)$};
+  \draw (B) node [right] {$G_0$};
+  \draw (C) node [left] {$D_0$};
+  \node (none) at (1, 0.35) {$\vartheta_0$};
+  \end{tikzpicture}
+}
+%
+\subfigure[V drugi točki $(x_1, y_1)$ imamo dve normalni smeri na gradient: $\vartheta_1 - \frac{\pi}{2}$ in $\vartheta_1 + \frac{\pi}{2}$. Izbrali smo $D_1$, da zmanjšamo ukrivljenost krivulje.]{
+  \begin{tikzpicture}[scale=0.65]
+  % koordinate
+  \coordinate (A) at (0, 0);
+  \coordinate (B) at (-2, 2);
+  \coordinate (C) at ({-2 + sqrt(8)*cos(60)}, {2 + sqrt(8)*sin(60)});
+  \coordinate (D) at ({-2 + sqrt(8)*cos(150)}, {2 + sqrt(8)*sin(150)}); 
+  \coordinate (E) at ({-2 + sqrt(8)*cos(-30)}, {2 + sqrt(8)*sin(-30)});
+  % vektorji
+  \draw [-latex, black, thick, >=] (B) -- (C);
+  \draw [-latex, black, thick, >=] (B) -- (D);
+  \draw [-latex, black, thick, >=] (B) -- (E);
+  % črte
+  \draw [dashed] (-2, 2) -- (1, 2);
+  \draw [solid, thick] (A) -- (B);
+  \draw [domain=0:60] plot ({-2 + 1.5*cos(\x)}, {2 + 1.5*sin(\x)});
+  \draw ({-2 + sqrt(0.125)*cos(150)}, {2 + sqrt(0.125)*sin(150)})
+        -- ({-2 + sqrt(0.25)*cos(105)}, {2 + sqrt(0.25)*sin(105)})
+        -- ({-2 + sqrt(0.125)*cos(60)}, {2 + sqrt(0.125)*sin(60)});
+  % oznake
+  \draw [fill=black] (B) circle (2pt);
+  \draw [fill=black] (A) circle (2pt) node [below] {$(x_0, y_0)$};
+  \draw (-2, 1.8) node [left] {$(x_1, y_1)$};
+  \draw (C) node [right] {$G_1$};
+  \draw (D) node [left] {$D_1$};
+  \node (none) at (-1, 2.35) {$\vartheta_0$};
+  \end{tikzpicture}
+}
+%
+\subfigure[Ta postopek ponavljamo pri iskanju ostalih kontrolnih točk. Potezo čopiča bomo upodobili kot kubični $B$-zlepek s kontrolnimi točkami $(x_i, y_i)$. Razdalja med kontrolnimi točkami je enaka trenutnemu polmeru čopiča.]{
+  \begin{tikzpicture}[scale=0.65]
+  % koordinate
+  \coordinate (A) at (0, 0);
+  \coordinate (B) at (-2, 2);
+  \coordinate (C) at ({-2 + sqrt(8)*cos(150)}, {2 + sqrt(8)*sin(150)});
+  \coordinate (D) at ({-2 + sqrt(8)*cos(150) + sqrt(8)*cos(110)}, {2 + sqrt(8)*sin(150) + sqrt(8)*sin(110)});
+  \coordinate (E) at ({-2 + sqrt(8)*cos(150) + sqrt(8)*cos(200)}, {2 + sqrt(8)*sin(150) + sqrt(8)*sin(200)});
+  \coordinate (F) at ({-2 + sqrt(8)*cos(150) + sqrt(8)*cos(290)}, {2 + sqrt(8)*sin(150) + sqrt(8)*sin(290)}); 
+  % vektorji
+  \draw [-latex, black, thick, >=] (C) -- (D);
+  \draw [-latex, black, thick, >=] (C) -- (E);
+  \draw [-latex, black, thick, >=] (C) -- (F);
+  % črte
+  \draw [solid, thick] (A) -- (B) -- (C);
+  \draw ({-2 + sqrt(8)*cos(150) + sqrt(0.125)*cos(110)}, {2 + sqrt(8)*sin(150) + sqrt(0.125)*sin(110)})
+        -- ({-2 + sqrt(8)*cos(150) + sqrt(0.25)*cos(155)}, {2 + sqrt(8)*sin(150) + sqrt(0.25)*sin(155)})
+        -- ({-2 + sqrt(8)*cos(150) + sqrt(0.125)*cos(200)}, {2 + sqrt(8)*sin(150) + sqrt(0.125)*sin(200)});
+  % oznake
+  \draw [fill=black] (A) circle (2pt) node [below] {$(x_0, y_0)$};
+  \draw [fill=black] (B) circle (2pt) node [right] {$(x_1, y_1)$};
+  \draw [fill=black] (C) circle (2pt);
+  \draw ({-2 + sqrt(8)*cos(150)}, {2.2 + sqrt(8)*sin(150)}) node [right] {$(x_2, y_2)$};
+  \draw (D) node [right] {$D_2$};
+  \draw (E) node [left] {$G_2$};
+  \end{tikzpicture}
+}
+%
+\caption{Iskanje novih kontrolnih točk.}
+\label{fig:kontrolneTocke}
+\end{figure}
+%
+Ukrivljenost krivulje lahko nadziramo s %TODO prevod
+infinite impulse response filter na smer poteze. Filter kontroliramo z vnaprej določeno filtrirno konstanto $f_c$.  Za dano zadnjo smer $D_{i-1}' = (d_{x, i-1}', d_{y, i-1}')$ in trenutno smer poteze $D_i = (d_x, d_y)$ izračunamo filtrirano smer kot
+$$D_i' = f_c D_i + (1 - f_c) D_{i-1}' = (f_c d_{x, i} + (1 - f_c) d_{x, i-1}', f_c d_{y, i} + (1 - f_c) d_{y, i-1}').$$ 
+%
+V algoritmu \ref{alg:splineStroke} je podana psevdokoda za iskanje kontrolnih točk.
+
+%
+\begin{algorithm}[htb]
+  \caption{Iskanje kontrolnih točk za kubični $B$-zlepek..}
+  \label{alg:splineStroke}
+\begin{algorithmic}[1]
+\Require $x_0$ $y_0$, $R$, $G$
+\Ensure Seznam kontrolnih točk $K$.
+\Function {Poteza} {$x_0$, $y_0$, $R$, $G$}
+  \State $C$ $\gets$ $G.barva(x_0, y_0)$ % TODO \gets
+  \State $K$ $\leftarrow$ prazen seznam kontrolnih točk
+  \State Dodamo točko $(x_0, y_0)$ v seznam kontrolnih točk $K$.
+  \State $(x, y)$ $\leftarrow$ $(x_0, y_0)$
+  \State $(zd_x, zd_y)$ $\leftarrow$ $(0, 0)$
+  \For {$i \in [1, \ldots, l_{max}]$}
+    \If {$i > l_{min}$ $\And$ $\abs{G.barva(x, y) - P.barva(x, y)} < \abs{G.barva(x, y) - C}$} % TODO zakaj ne dela \And? 
+      \State \Return $K$
+    \EndIf
+    \If {$G.magnituda(x, y) == 0$}
+      \State \Return $K$
+    \EndIf
+    \State $(g_x, g_y)$ $\gets$ $G.smer(x, y)$
+    \State $(d_x, d_y)$ $\gets$ $(-g_y, g_x)$
+    \If {$zd_x \cdot d_x + zd_y \cdot d_y < 0$}
+      \State $(d_x, d_y) = (-d_x, -d_y)$
+    \EndIf
+    \State
+    \State $(d_x, d_y) = f_c \cdot (d_x, d_y) + (1 - f_c) \cdot (zd_x, zd_y)$
+    \State $(d_x, d_y) = (d_x, d_y) / \sqrt{d_x^2 + d_y^2}$
+    \State $(x, y) = (x + R \cdot d_x, y + R \cdot d_y)$
+    \State $(zd_x, zd_y) = (d_x, d_y)$
+    \State Točko $(x, y)$ dodamu seznamu $K$.
+  \EndFor
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+%
+Minimalno dolžino za potezo $l_{min}$ predpišemo, da se izognemo prekratkim potezam, ki bi delovale moteče. Za upodabljanje potez najprej s pomočjo subdivizij izračunamo zlepek. Nato pa vzdolž poti dobljenega zlepka narišemo potezo z antialiazirano ciklično masko.
+%
+\section{Anizotropični čopič za likovno upodabljanje}
+Likovno upodabljanje s čopičem sestoji iz teh glavnih sklopov:
+%
+\begin{itemize}
+  \item postavitev potez na platno in njihovi parametri (velikost, prosojnost \ldots);
+  \item izračun vektorskega polja, ki določi smeri potez in njihovo pot (množica urejenih točk);
+  \item upodabljanje potez čopiča, ki pove kako bomo posamezno potezo upodobili na platnu.
+\end{itemize}
+%
+Pogledali si bomo upodabljanje potez s čopičem.
+%
+\subsection{Upodabljanje potez z anizotropičnim čopičem}
+Najpogostejša metoda za upodabljanje potez je risanje antialiazirane črte vzdolž poti poteze. Čeprav je to enostavno za implementacijo, pa se na ta način upodobljene poteze od ročno narisanih potez s čopičem močno razlikujejo. Antialiazirana črta ima le eno barvo, brez strukture. Predstavili bomo simulacijo ročnega risanja s čopičem. Najprej bomo predstavili model anizotropičnega čopiča. V maski čopiča bo vsaka vrednost večja od 0 predstavljala pripadajočo nit na čopiču. Inteziteta posameznih elemntov maske predstavljajo kontakt med niti čopiča in platnom (0 pomeni, da stika ni; 1 pomeni, da je popolni kontakt). Prosojnost čopiča je določena kot povprečna vrednost intezitet v maski čopiča. Vsaki niti čopiča najprej predpišemo barvo in nato vlečemo masko čopiča vzdolž poti poteze.
+
+Digitalni čopič, ki smo ga opislai zgoraj nastavimo v treh korakih:
+%
+\begin{enumerate}
+  \item Izbrati moramo pravo velikost maske za čopič ali pa dano masko za čopiča skalirati, da ta ustreza velikosti čopiča.
+  \item Intezitete v maski čopiča pomnožimo s parametrom, ki smo ga nastavili, da prilagodimo inteziteto čopiča.
+  \item Posameznim nitim čopiča v maski čopiča priredimo barvo (barvo priredimo le tistim elemntom maske, ki imajo vrednost večjo od 0).
+\end{enumerate}
+% 
+Barvo posameznim nitim čopiča določimo s formulo
+$$
+C_{nit} = \alpha \cdot C_{nit} + (1 - \alpha) \cdot C_{poteza} + C_{"sum},
+$$
+kjer je $C_{nit}$ barva na referenčni sliki, $C_{poteza}$ je barva začetne kontrolne točke za potezo in $C_{"sum}$ je perturbacija barve, s katero dosežemo učinek približnosti pri slikanju.
+
+Po inicializaciji čopiča, narišemo potezo čopiča vzdolž poti, ki je sestavljena iz urejenih točk. Natančneje, na vsaki točki postavimo našo masko in pobarvamo območje, ki ga zavzema maska na sliki po formuli
+$$
+C_{platno} = \frac{I_{nit}}{255} \cdot C_{nit} + (1 - \frac{I_{nit}}{255} \cdot C_{platno}),
+$$
+kjer je $C_{platno}$ matrika barv ustreznega območja na platnu in je $I_{nit}$ maska čopiča z intezitetami 
+%
+\subsection{Lighting effect} % TODO
+Dodajanje učinka svetlosti in bleščanja platnu, lahko zelo izpopolni kvaliteto upodabljanja slik. Predstavili bomo metodo za dodajanje efekta svetljenja, ki je za implementacijo zelo enostavna. Podobno kot Hertzmann v \ref[7], moramo najprej naračunati višinsko polje za platno, ki za vsako slikovno točko na platnu predstavlja njeno višino. Za razliko od Hertzmanna, ki vsaki posamezni potezi predpiše preslikavi, ki določata prosojnost in višino posameznih slikovnih točk na potezi, bomo uporabili masko čopiča in antialiazirano črto ter z upodabljanjem določili višinsko in prosojnostno preslikavo.
+
+Inteziteto posameznih slikovnih točk na potezi čopiča (višinska preslikava), določimo kot povprečno vrednost intezitet, ki pri risanju s čopičem prečkajo to slikovno točko. Prosojnostno preslikavo pa določimo z upodobitvijo poteze čopiča na črno podlago kot antialiazirano črto, kateri nastavimo polmer nekoliko manj od polemra čopiča. Prosojnostne preslikave posameznih potez nato uporabimo kot uteži pri izračunu višinskega polja za platno.
+
+Namesto uporabe Modela za senčenje Phong, bomo simulirali lighting effect % TODO prevod
+tako, da bomo prilagodili intezitete slikovnih točk na platnu. Za vsako slikovno točko $(x, y)$ na platnu, je prilagoditev intezitete te točke sorazmerna z višinsko razliko $D(x, y)$
+%
+\begin{align*}
+d & = O(x, y) - \pi/2, \\
+D(x, y) & = h(x + \cos d, y + \sin d) - h(x, y),
+\end{align*}
+%
+kjer $d$ predstavlja smer, ki je pravokotna na orientacijo poteze $O(x, y)$ in  $h$ označuje višino slikovne točke, tj.\ pripadajočo inteziteto slikovne točke na višinskem polju platna. Če je $D(x, y)$ pozitiven, potem bo vrednost intezitete slikovne točke narasla, sicer bo padla. Prilagoditev intezitet mora biti majhna vrednost, v primeru, ko je vrednost intezitete blizu 0 ali 255, po drugi strani je vrednost prilagoditve lahko ogromna, kadar je začetna vrednost intezitete blizu povprečne vrednosti 127. Natančneje, za slikovno točko $(x, y)$ na platnu, prilagoditev intezitet izračunamo kot
+$$
+I(x, y) = I(x, y) + a \cdot D(x, y) \cdot \frac{\min (I(x, y), 255 - I(x, y))}{127.5},
+$$
+kjer je $a$ parameter, s katerim kontroliramo inteziteto lightinga. %TODO prevod
+Ker je platno barvno, prilagoditev intezitete izvedemo za vsak barvni kanala posebaj.
+%
+\subsection{Fast paint texture}
+Algoritem za vhod dobi urejen seznam potez čopiča, model senčenja in množico višinskih polj potez čopiča. Likovno upodabljanje tako poteka v treh korakih:
+%
+\begin{enumerate}
+  \item S kompoziranjem potez čopiča najprej izračunamo osnovno sliko.
+  \item Izračunamo višinsko polje, tj.\ za vsako slikovno točko na sliki pove skupno višino nanešene barve.
+  \item Končno sliko izračunamo s pomočjo bump-mappinga s pomočjo modela senčenja Phong.
+\end{enumerate}
+%
+Najprej moramo ustvariti matriko z vrednostmi barv, ki jih ima slika brez svetljenja. To naredimo s kompoziranjem potez čopiča na platno.
+
+Sedaj izračunamo višinsko polje, ki pove višino nanešene barve za posamezne točke. Najprej nastavimo polje z ustreznimi dimenzijami in nastavimo barvo na črno. nato v vrstnem redu upodabljamo poteze čopiča, ampak kot črnobele. Toni slikovnih točk poteze so določeni s teksturno preslikavo. Vsakič celotni potezi dodamo zraven še vrednost, ki je sorazmerna s številom potez čopiča, ki so že narisane. Zato so poteze, ki so v ozadju narisane bolj temno (tj.\ plitva območja oz.\ dolince), poteze naisane kasneje pa bodo bolj svetlih barv. Če bi višinsko polje gradili tako, da bi kar prištevali zraven višine novo narisanih potez, bi se poteze narisane v ozadju pojavljale v višinskem polju, česar pane želimo.
+
+Končno sliko izračunamo iz višinskega polja in osnovne slikae tako, da za izračunamo polje normal iz višinskega polje in poračunamo nove barve s pomočjo modela Phong.
+%
+% Notes on Gaussian blur
+% http://stackoverflow.com/questions/17841098/gaussian-blur-standard-deviation-radius-and-kernel-size
+
+% Z-buffer
+% http://www.google.si/url?sa=t&rct=j&q=&esrc=s&source=web&cd=15&ved=0C
+% JgBEBYwDg&url=http%3A%2F%2Fweb.eecs.utk.edu%2F~huangj%2Fcs456%2
+% Fnotes%2F456_rasterization.pdf&ei=6WRuUuIYita0BoaZgZgH&usg=AFQjCNHgr
+% Ig6qcQ3zXtszjawy9pEos0owQ&sig2=S1eiksIjOd80pAukxEv7xg&bvm=bv.5512
+% 3115,d.Yms
+%%
+%%
+%%
+\section{Optimizacijski algoritmi}
+%
+Pri požrešni metodi smo poteze postavljali na platno po vnaprej določenem pravilu. Ko smo potezo enkrat postavili na platno, je nismo več spreminjali. Opazimo pa, da bi bilo večkrat za dosego lepše slike bolje, da bi neki potezi spremenili obliko in barvo ali pa jo celo odstranili. Tak način razmišljanja uporablja optimizacijski pristop k likovnemu upodabljanju s potezami, ki ga bomo spoznali v tem razdelku.
+
+%
+Kadar imamo opravka z optimizacijo moramo običajno določiti kriterijsko funkcijo, s pomočjo katere dosežemo željeni rezultat. V našem primeru bo to \emph{LUP energijska funkcija} $\fun{E}{\J}{\R}$, kjer je $\J$ množica vseh možnih slik. Pri požrešnih metodah upodabljanja smo stil slike določili z izbiro parametrov, ki so določali potek algoritma. Tukaj pa bomo stil slike določili z izbiro energijske funkcije in vrsto poteze (npr.\ poteza s čopičem ali mozaična ploščica).
+
+%
+Kljub temu, da bomo pri slikanju na optimizacijski način dobili veliko boljši rezultat kot pri požrešni metodi, pa tak način slikanja ni naraven. Slikar namreč na platnu ponavadi neke poteze, ko jo naslika na platno, običajno ne more več spreminati. Slabost je tudi ta, da bo čas likovnega upodabljanja v nekaterih primerih drastično narastel (če bi pri požrešni metodi porabili pet minut, se kaj lahko zgodi, da bomo pri optimiziranju za dosego podobnega stila pri isti vhodni sliki potrebovali pet ur). Optimizacijski pristop po drugi strani pri svojem ustvarjanju uporabljajo sestavljalci mozaiki. Sestavljalec najprej na podlagi s prestavljanjem, izbiro ploščic druge barve in spreminjanjem oblike ploščic sestavi željeno sliko, nato pa ploščice zacementira.
+
+%
+V prvem podrazdelku bomo opisali energijsko funkcijo in opisali osnovne kriterije, ki jih bomo upoštevali pri njenem izračunu. V preostalih dveh podrazdelkih pa bomo opisali dva različna optimizacijska pristopa k upodabljanju. Prva skupina algoritmov, ki jo bomo opisali, so Voronojevi algoritmi. Z njimi bomo pokazali kako lahko sestavimo mozaik. Nato bomo spoznali še izkustvene algoritme, pri katerih bomo uporabljali hevristično izbrane teste, s pomočjo katerih bomo minimizirali energijsko funkcijo. Voronojevi algoritmi imajo boljšo časovno zahtevnost, ampak je ne moremo prilagoditi različnim vrstam problemov. Medtem ko imajo izkustveni algoritmi slabšo časovno zahtevnost, pa jih lahko z izbiro energijske funkcije in parametrov prilagodimo različnim problemov in poustvarimo veliko več likovnih stilov.
+%
+%% Energijska funkcija
+\subsection{Energijska funkcija}
+%
+Glavni dve merili, ki ju bomo upoštevali pri računanju vrednosti energijske funkcije $E$, sta število potez in ujemanje slike $J$ s fotografijo $I$. Kot smo že omenili, bi lahko namreč z ogromnim številom majhnih potez zelo dobro aproksimirali fotografijo $I$, vendar pa ne bi dobili likovno zadovoljivega rezultata. Pri optimiziranju skušamo doseči, da neko sliko zadovoljivo aproksimiramo s čim manjšim številom potez. Na ta način v sliko vnesemo abstrakcijo in željeni likovni pridih. Osnovna energijska funkcija, ki jo bomo optimizirali, bo:
+%
+\begin{align*}
+E(J) & = E_p(J) + w_n \cdot E_n(J), \\
+E_p(J) & = \sum_{(x, y) \in J} \norm{J(x, y) - I(x, y)}_2^2, \\
+E_n(J) & = \textup{število potez na sliki }J.
+\end{align*}
+%
+S spreminjanjem vrednosti parametra $w_n \in [0, 1]$ v energijski funkciji nadziramo število potez. Vrednosti parametra blizu $0$ pomenijo, da bomo uporabili veliko število potez, posledično bo slika $I$ zelo podobna fotografiji $J$ in ne bo vsebovala abstrakcije. Za dosego bolj likovno estetskega rezultata bomo uporabili vrednosti parametra $w_n$ blizu $1$, saj bomo na ta način zmanjšali število končnih potez in s tem dodali v sliko več estetskosti.
+
+%
+Kot bomo videli v nadaljevanju, bomo energijsko funkcijo prilagodili glede na dani problem, dodali več kriterijev in omogočili prosto izbiro več parametrov. Izbiri energijske funkcije, ki jo bomo uporabili pri optimiziranju, skupaj z modelom poteze bomo rekli \emph{stil slike}.
+%
+\begin{opomba}
+Energijsko funkcijo lahko izberemo tudi kot merilo za kvaliteto končne slike, ki jo dobimo pri upodabljanju s požrešno metodo.
+\end{opomba}
+%
+%% Voronojevi diagrami
+\subsection{Voronojevi algoritmi}
+%
+Za opis Voronojevega algoritma pri LUP bomo potrebovali osnove Voronojevih diagramov in KD--dreves. % TODO pravo ime za kd drevesa
+Bralec se lahko o slednjih pozanima v knjigi \cite{Orourke} in članku \cite{nevemse}. Hausner je v članku \cite{Hausner} na podlagi že znane Lloydove metode, ki je bila neodvisno predstavljena v člankih \cite{} (clustering) in \cite{} (kvantizacija), v primeru, ko na platno postavljamo neprekrivajoče se poteze s podobno obliko, problem prevedel na Voronojev diagram. Kasneje bomo to metodo predstavili in videli, da lahko z njo ustvarimo mozaike pri katerih uporabljamo kvadratne ploščice. Najprej pa bomo sedaj predstavili osnovno Lloydovo metodo.
+%
+\subsubsection{Loydova metoda}
+%
+Naj bo $p$ slikovna točka na platnu. Z $\{C_i\}_{i \in \I}$ bomo označili posebno množico slikovnih točk, ki jim pravimo \emph{centri}. Centri določajo postavitev potez na platnu, slednje namreč postavimo tako, da imajo središča v centrih. Naj bo $L_p^i \in \set{0, 1}$ označitev slikovnih točk, pri čemer $L_p^i = 1$ pomeni, da slikovna točka $p$ pripada centru $C_i$. Vsaka slikovna točka pripada natanko enemu centru, za vsak $i$ mora veljati $\sum_p L_p^i = 1$.
+
+\textbf{Naloga:} Izbira množice centrov in označitve slikovnih pik, ki minimizira naslednjo energijsko funkcijo:
+%
+\begin{align*}
+E(J) & = \sum_{p \in J,\ i \in \I} L_p^i \cdot \norm{p - C_i}_2^2 \\
+       & = \sum_{p \in J,\ i \in \I} L_p^i \cdot ((p_x - C_{i, x})^2 + (p_y - C_{i, y})^2) .
+\end{align*}
+%
+V primeru, ko bi že imeli optimalno postavljene centre, bi optimalno označitev enostavno izračunali tako, da bi vsaki slikovni točki pripisali njej najbližji center oz.~izračunali Voronojev diagram. Vendar pa so običajno na začetku centri podani neenakomerno in kot taki ne dajo dobrega rezultata (glej sliko \ref{img:slikaLevo}).
+%
+\begin{figure}[htbp]
+%
+\centering
+\subfigure[Naključno razporejeni centri.]{
+\includegraphics[width=0.4\textwidth]{./slike/levo.png}
+}
+%
+\subfigure[Enakomerno razporjeni centri.]{
+\includegraphics[width=0.4\textwidth]{./slike/desno.png}
+}
+%
+\caption{Iskanje novih kontrolnih točk.}
+\label{fig:slikaLevo}
+\end{figure}
+%
+Pri Lloydovi metodi na vsakem koraku optimizacije spremenimo položaje centrov in na novo označimo slikovne točke. Položaje novih centrov izračunamo tako, da pri fiksni označitvi slikovnih točk za center $C_i$ rešimo enačbo $\frac{\partial E(I)}{\partial C_i} = 0$. Nove položaje centrov izračunamo po formuli
+%
+$$C_i = \frac{\sum_p L_p^i  \cdot p}{\sum_p L_p^i}.$$
+%
+Zgornja formula nam da povprečje vseh slikovnih točk, ki trenutno pripadajo centru~$C_i$. Postopka izračuna novih položajev centrov in oz\-na\-čit\-ve slikovnih točk ponavljamo dokler ne dobimo optimalne rešitve. Optimalna rešitev obstaja, ker imamo na voljo le končno mnogo označitev slikovnih točk in na vsakem koraku izračunamo centre tako, da minimiziramo energijo funkcije pri fiksni označitvi. V algoritmu \ref{alg:Lloyd} je predstavljena psevdokoda zgoraj opisane Lloydove metode.
+%
+\begin{algorithm}[htb]
+  \caption{Lloydova metoda.}
+  \label{alg:Lloyd}
+\begin{algorithmic}[1]
+\Require $n$, $J$
+\Ensure množica centrov $\CC = \{C_i\}_{i \in \I}$
+\Function {Lloydova metoda} {$n$, $J$}
+  \State $\CC$ $\gets$ množica naključno izbranih $n$ točk na platnu $J$
+  \While {konvergira}
+    \State $L_p^i$ $\gets$
+             $\begin{cases}
+               1 &\mbox{če } i = \argmin_i\norm{p - C_i}_2^2\\
+               0 & \mbox{sicer}
+              \end{cases}$
+    \State $C_i$ $\gets$ $\frac{\sum_p L_p^i p}{\sum_p L_p^i}$
+  \EndWhile
+  \State \Return $\CC$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+%
+
+Na sliki \ref{img:slikaLevo} desno so narisani centri in Voronojeve celice, h katerimi je skonvergiral algoritem.
+%%
+\subsubsection{Utežena Lloydova metoda}
+%Adrian Secord. Weighted Voronoi Stippling. In NPAR 2002: Proceedings of the Second Annual Symposium on Non-Photorealistic Animation and Rendering, June 2002.
+Secord je v članku \cite{Secord} predstavil uteženo Lloydovo metodo. Uporabil jo je za upodabljanje črnobelih slik s črnimi pikami. Ker gre za črnobelo sliko, moramo paziti pri razporeditvi pik na območjih z različnimi sivinami in v okolici linij, ki določajo objekte na sliki, saj bi sicer lahko dobili monotono sliko. Secord je problem rešil tako, da je različnim območjem na sliki predpisal gostoto upodobljenih pik.
+%
+\begin{opomba}
+Možna rešitev problema bi bila tudi uporaba pik različnih velikosti.
+\end{opomba}
+%
+\emph{Ploskovno gostoto} $\rho$, ki jo bomo uporabili v algoritmu, za posamezne slikovne točke izračunamo tako, da njihove vrednosti na fotografiji $J$ preslikamo na interval $[0, 1]$:
+$$\rho(p) = 1 - \frac{J(p)}{M},$$
+kjer je $M$ največja vrednost slikovne točke na $J$. Prejšnjo energijsko funkcijo popravimo tako da posamezne člene v vsoti pomnožimo z gostoto in dobimo:
+%
+\begin{align*}
+E(J) & = \sum_{p \in J} L_p^i \rho(p) \norm{p - C_i}^2 \\
+       & = \sum_{p \in J} L_p^i \rho(p) ((p_x - C_{i, x})^2 + (p_y - C_{i, y})^2).
+\end{align*}
+%
+Na ta način zagotovimo, da bodo na temnejših območjih pike razporejene bolj na gosto, na svetlih območjih pa bolj na redko. S tem bomo dobili tudi izrazitejše linije na sliki, saj so linije na fotografiji temnejše. Utežena Lloydova metoda se od navadne Lloydove metode razlikuje le v izračunu novih centrov (korak $5$), ki jih sedaj izračunamo kot \emph{uteženo} povprečje slikovnih točk iz pripadajoče Voronojeve celice: Nov center $C_i$ izračunamo s formulo
+%
+$$C_i = \frac{\sum_p L_p^i \rho(p)p}{\sum_p L_p^i \rho(p)}.$$
+%
+\begin{opomba}
+Izračun novih centrov lahko znatno pohitrimo s tem, da vsote, ki nastopajo v imanovalcih izračunamo vnaprej in jih potem v izračunih novih centrov samo uporabimo.
+\end{opomba}
+%
+Na sliki \ref{fig:stipples} je prikazan primer uporabe utežene Lloydove metode. Podobno kot pri Lloydovi metodi bomo tudi sedaj dobili optimalno rešitev.
+%
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./slike/stipples.png}
+\caption{Primer.}
+\label{fig:stipples}
+\end{figure}
+%
+%%
+\subsubsection{Lloydova metoda za ustvarjanje mozaikov}
+%
+Sedaj si bomo pogledali kako lahko barvno sliko pretvorimo v mozaik. Mozaik lahko enostavno sestavimo tako, da izračunamo Voronojev diagram s pomočjo Lloydove metode. Za barvo posamezne Voronojeve celice lahko izberemo kar barvo slikovne točke na fotografiji, ki ustreza centru te celice. Na sliki \ref{img:Voronoj1} je prikazan primer uporabe te metode.
+%
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./slike/stipples.png}
+\caption{Primer.}
+\label{fig:Voronoj1}
+\end{figure}
+%
+
+Hausner pa je v članku \cite{Hausner} na podlagi Lloydove metode predstavil metodo, s pomočjo katere lahko sestavimo mozaik iz kvadratnih ploščic. Razlog, da so Voronojeve celice konveksni nepravilni večkotniki je uporaba evklidske razdalje pri računanju Voronojevega algoritma. Izračun Voronojevega algoritma namreč sloni na naslednji ideji. Na vsakega izmed centrov postavimo neskončni stožec s stranicami pod kotom $45 \circ$ tako, da ima vrh pri centru. Stožec uporabimo zato, ker slikovne točke, ki so enako oddaljene od centra ležijo na krožnici. Če stožec projeciramo na ravnino dobimo neskončno množico krožnic. Opazimo, da slikovne točke, ki so enako oddaljene od dveh centrov ležijo na projekciji presečišča pripadajočih stožcev. Voronojev diagram dobimo, če pogledamo stožce od spodaj. %TODO to lepše spiši
+Na sliki \ref{fig:VoronojStozci} je prikazan pogled Voronojevaga diagrama od spodaj.
+%
+\begin{figure}[htbp]
+%
+\centering
+\subfigure[Naključno razporejeni centri.]{
+\includegraphics[width=0.4\textwidth]{./slike/levo.png}
+}
+%
+\subfigure[Enakomerno razporjeni centri.]{
+\includegraphics[width=0.4\textwidth]{./slike/desno.png}
+}
+%
+\caption{Iskanje novih kontrolnih točk.}
+\label{fig:VoronojStozci}
+\end{figure}
+%
+
+Pri Manhattanski razdalji ($\norm{v}_1 = \abs{v_x} + \abs{v_y}$) so krožnice kvadrati. Slednje je izkoristil Hausner, ki je stožce nadomestil s kvadratnimi piramidami. Uvedel je tudi vektorsko polje $\Phi(p)$, ki ga je uporabil za orientacijo kvadratnih ploščic. Pri izračunu Voronojevega diagrama orientacijo v centru upoštevamo tako, da zarotiramo piramide v predpisani smeri in nato nadaljujemo s postopkom. Orientacijo ploščic uporabimo zato, da oblike in linije na mozaiku pridejo do izraza. Upoštevati pa jo moramo že pri same izračunu zato, ker bi v primeru rotiranja ploščic na koncu, ko bi že imeli določene centre, prišlo do prekrivanja ploščic, česar pa ne želimo.%TODO lepo spiši
+
+Energijska funkcija, ki smo jo dobili pri teh pogojih je enaka
+%
+\begin{align*}
+E(J) = \sum_{p \in J} L_p^i \norm{R_{\Phi(C_i)} (p - C_i)}_1^2,
+\end{align*}
+%
+kjer je $R_{\Phi(C_i)}$ rotacijska matrika s parametrom $\Phi(C_i)$. V algoritmu \ref{alg:LloydHausner} je povzeta psevdokoda delovanja zgornje metode.
+%
+%
+\begin{algorithm}[htb]
+  \caption{Lloydova metoda.}
+  \label{alg:LloydHausner}
+\begin{algorithmic}[1]
+\Require $n$, $J$
+\Ensure množica centrov $\CC = \{C_i\}_{i \in \I}$
+\Function {Lloydova metoda} {$n$, $J$}
+  \State $\CC$ $\gets$ množica naključno izbranih $n$ točk na platnu $J$
+  \While {konvergira}
+    \State $L_p^i$ $\gets$
+             $\begin{cases}
+               1 &\mbox{če } i = \argmin_i\norm{R_{\Phi}(p - C_i)}_1^2\\
+               0 & \mbox{sicer}
+              \end{cases}$
+    \State $C_i$ $\gets$ $\frac{\sum_p L_p^i p}{\sum_p L_p^i}$
+  \EndWhile
+  \State \Return $\CC$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+%
+
+Bralca moramo tu opozoriti na to, da zgornji algoritem teoretično ni več optimizacijski algoritem, saj na posameznih korakih ne dobimo nujno boljše rešitve. %TODO povej kdaj se sfiži
+Kljub temu pa se v praksi izkaže, da dobimo s pomočjo tega algoritma zadovoljive rezultate. Sedaj, ko znamo izračunati centre ploščic, si poglejmo še kako določimo barvo, velikost in orientacijo ploščic pri njihovemu  končnemu upodabljanju.
+%
+\begin{opomba}
+Algoritem bi lahko izboljšali še tako, da bi na različnih območjih uporabljali različno velike ploščice. Npr.~če delamo mozaik potreta, potem bi bilo smiselno za ozadje uporabiti večje ploščice, za detajle kot so oči, nos in usta pa manjše. 
+\end{opomba}
+%
+Predstavljenega Voronojevega algoritma se ne da enostavno razširiti tako, da bi pri minimizaciji in izračunu energijske funkcije upoštevali barvo ploščic. Problem, ki ni enostavno rešljiv, je tudi prekrivanje sosednjih ploščic, saj v samem algoritmu te omejitve ne upoštevamo. Kot vidimo je Voronojev algoritem kot tak neprilagodljiv in ga ne moremo uporabiti pri npr.~postavljanju potez čopiča. Je pa zato toliko bolj prilagodljiv in široko uporabljen izkustveni algoritem, ki ga bomo predstavili v naslednjem podrazdelku.
+%%
+\subsection{Izkustveni algoritmi}
+%
+Podobno kot pri Lloydovi metodi bomo tudi tu potrebovali energijsko funkcijo za izračun vrednosti energije trenutne slike, ki bo tu upoštevala več parametrov in omejitev kot smo jih prej. Bistvena razlika pa je tu pri izračunu nove slike. Na vsakem koraku algoritma bo namreč predlagana nova sprememba glede ene poteze. Kadar bo ta sprememba vodila v zmanjšanje skupne energije slike, jo bomo obdržali, sicer pa zavrgli. Slaba lastnost tega algoritma je, da v primeru slabo zastavljenega izbora novih sprememb potez, algoritem ne bo konvergiral, prav tako ni nikakršnega zagotovila, da bo algoritem skonvergiral k dobri rešitvi v zadovoljivem času.
+
+V nadaljevanju bomo opisali algoritem, ki ga je v članku \cite{Hertzmann:Relaxation} predstavil Hertzmann. Njegov algoritem je nagradnja že znanega postopka za slikanje s čopičem, ki ga je predlagal Haeberli v članku \cite{Haeberli:PaintNumbers}, in članka \cite{Turk:Guided}, v katerem sta Turk in Banks na ta način predstavila upodabljanje vektorskih polj s tokovnicami. Za začetek si poglejmo algoritem~\ref{alg:trialanderror}, v katerem je povzeta psevdokoda za izkustveni algoritem.
+%
+%
+\begin{algorithm}[htb]
+  \caption{Izkustveni algoritem.}
+  \label{alg:trialanderror}
+\begin{algorithmic}[1]
+\Require fotografija $I$
+\Ensure slika $J$
+\Function {IzkustvenaMetoda} {$J$}
+  \State $J$ $\gets$ začetna slika (belo platno)
+  \While {konvergira}
+    \State $P$ $\gets$ \Call {Poteza}{\ }%TODO zakaj ne nardi ()
+    \If {$E(P(J)) < E(J)$}
+       \State $J$ $\gets$ $P(J)$
+    \EndIf
+  \EndWhile
+  \State \Return $J$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+%
+
+Najprej bomo opozorili na dejstvo, da zaustavitvenega pogoja v zgornjem algoritmu nismo natančno določili, temveč odločitev o zaustavitvi algoritma prepustimo uporabniku. Glavni nalogi v zgornjem algoritmu sta sistem, ki je zadolžen za predlaganje novih sprememb na sliki, in izračun energijske funkcije. Pri izračunu energijske funkcije je pomembno, da znamo uravnotežiti različne zahteve, ki jim mora ustrezati slika, npr.~čim manjše število potez in dobra aproksimacija slike z vhodno fotografijo.
+%
+\subsubsection{Energijska funkcija}
+Naloga, ki smo se je lotili, je izmed vseh možnih slik poiskati tisto, ki se bo najbolj ujemala z vhodno fotografijo, bo v celoti pokrita z barvo in bo naslikana s čim manj potezami. Energijska funkcija, ki jo bomo minimizirali, je dana s formulo
+%
+$$E(J) = E_{p}(J) + E_{b}(J) + E_{n}(J) + E_{nb}(J).$$
+%
+Kot vidimo, v energijski funkciji nastopa več pomožnih energijskih funkcij:
+%
+\begin{enumerate}
+\item \emph{Ujemanje slike s fotografijo}:
+$$E_{p}(J) = \sum_{p \in J} w_{p}(p) \norm{J(p) - I(p)}.$$
+Energijska funkcija $E_p$ meri razliko med fotografijo $I$ in sliko $J$ po slikovnih točkah. Ralika med posameznimi slikovnimi je evklidska razdalja med slikovnima točkama, predstavljenima v RGB prostoru. Uteži $w_p$ lahko določimo ročno ali avtomatično. Avtomatično jih določimo tako, da izračunamo linijsko binarno sliko z uporabo Sobelovega filtra. Na ta način bodo poteze čopiča v okolici linij in podrobnosti na sliki prišle bolj do izraza, saj bo na teh delih slike algoritem pri izračunu energije dal večji poudarek ujemanju slike z vhodno fotografijo. Ročno uteži lahko določimo enostavno tako, da poleg fotografije, ustvarimo binarno sliko, na kateri označimo dele slike, za katere želimo, da so naslikani bolj natančno.
+%
+\item \emph{Količina barve}:
+$$E_{b}(J) = w_{b} \sum_{P \in J} S(P).$$
+Kot vidimo je ta energijska funkcija v tekmovalnem odnosu s prvo. Tukaj namreč želimo, da na sliki uporabimo čim manj barve, energijska funkcija $E_p$ pa uravnava ujemanje s fotografijo. Z uravnavanjem parametrov teh dveh funkcij lahko uporabnik v grobem ustvari različne slikarske stile.
+%
+\item \emph{Število potez}:
+$$E_{n}(J) = w_{n} \cdot \textup{(število potez na sliki $J$)}.$$
+%
+\item \emph{Pokritost območja:}
+$$E_{nb}(I) = w_{nb} \cdot \textup{(število nepobarvanih slikovnih točk v $J$)}.$$
+\end{enumerate}
+%
+\subsubsection{Sistem za predlaganje sprememb potez na sliki}
+%
+\emph{Sistem za predlaganje sprememb na sliki}, ki bi dovolil, da uporabljamo poteze vseh vrst (npr.~diske), se ne bi obnesel dobro v smislu hitrosti delovanje. V takem sistemu bi namreč dobili preveč sprememb, ki ne bi znižale energijske funkcije, in bi torej bile zgolj potrata časa. V našem sistemu, ki bo služil za upodabljanje slik s čopičem, se bomo zato omejili na poteze s čopičem. Vsaka poteza bo določena z debelino čopiča in množico kontrolnih točk (glej \ref{defPoteza}). %TODO definiraj to potezo pri požrešni metodi
+
+Vzpostavitev dobrega sistema je ključnega pomena pri tem algoritmu. Če bi izbirali nove spremembe naključno, bi namreč ponovno po nepotrebnem trošili čas. Ena izmed možnih rešitev je tudi ta, da na vsakem koraku uporabnik sam predlaga nove spremembe, ki jih program ovrže ali obdrži. V nadaljevanju bomo najprej opisali možne posamezne spremembe in nato še skupine sprememb, ki jih sistem lahko predlaga.
+%
+\subsubsection{Opis posameznih možnih sprememb:}
+%
+\begin{itemize}
+  \item Dodajanje nove poteze: na podlagi izbrane točke na sliki ustvarimo novo potezo. Novo potezo vedno dodamo na konec seznama vseh potez (poteze narišemo na platno v vrstenm redu). Na način, ki je opisan v \ref{9} dodamo nove kontrolne točke. Novo potezo nato relaksiramo. Rezultat tega iskanja je nato predlog za novo spremembo na sliki.
+  \item Reaktivacija poteze: Dana poteza je relaksirana in sprememeba je nov predlog. Vendar pa v primeru, ko bi brisanje poteze iz slike energijo slike zmanjšajo bolj kot modifikacija poteze, potem potezo pobrišemo. Brisanje ene poteze ne vpliva na vrstni red potez. Na ta način bomo v postopku pobrisali poteze, ki so zadaj za ostalimi potezami, če za vključitev poteze na sliko obstaja kazen (tj.\ $w_{area} > 0$ ali $w_{nstr} > 0$).
+  \item Odebelitev poteze: Če je radij poteze pod maksimumom, potem povečamo njen radij. Potezo zatem reaktiviramo. To potezo sedaj damo kot nov predlog za spremembo.
+  \item Zoožanje poteze: Če je radij poteze nad minimumom, potem radij poteze zmanjašamo in potezo reaktiviramo.
+  \item Prebaravanje: Barvo poteze nastavimo na povprečno vrednost barv območja vhodne slike, ki ga obsega poteza. Potezo nato reaktiviramo.
+\end{itemize}
+%
+\subsubsection{Kombinacija korakov:}
+%
+Individualne spremembe kombiniramo v zanke, da zagotovimo, da je vsaka poteza vsaj enkrat relaksirana.
+%
+\begin{itemize}
+  \item Postavitvena plast: Zanka preko slike, znotraj katere s pomočjo postopka \textit{Dodajanje poteze} dodamo novo potezo s predpisanim radijem in naključno spremenjeno začetno točko.
+  \item Splošna reaktivacija: Iteracija preko množice vseh potez v njihovem zaporedju in njihova \textit{Relaksacija}.
+  \item Odebeljenje/Zoožanje vseh potez: Za vsako potezo izvedemo postopek \textit{Odebelitve} dokler sprememba ni zavržena li pa poteza pobrisana. V primeru, ko poteza ostane nespremenjena izvedemo postopek \textit{Zoožitve} dokler ta sprememba ni zavrnjena lai pa poteza pobrisana.
+  \item Splošno prebarvanje: Iteriramo preko množice potez in uporabimo postopek \textit{prebarvanje}.
+  \item Skripta: Izvedi zaporedje relaksacijskih zank. Če želimo narediti sliko na novo, uporabimo naslednji algoritem:
+% TODO algoritem
+\end{itemize}
+%
+Običajno je $N=2$. Zgornja skripta običajno pripelje do konvergence. Opazimo, da relaksacijsko zanko izvedemo na vseh potezah, ne le teh, ki imajo trenutno velikost.
+
+\textbf{Relaksacija poteze:} Osnovna strategija, ki jo uporabimo za sistem predlaganja novih sprememb, je uporaba \emph{relaksacija poteze}. Gre za adaptacijo snakes \ref{10, 2} na energijsko funkcijo: poišče aproksimacijo lokalnega minimuma za dani položaj poteze.
+
+High-level algoritem za modifikacijo poteze je:
+%
+\begin{enumerate}
+  \item Izračunamo energijo slike.
+  \item Izberemo eno izmed obstoječih potez.
+  \item Po potrebi spremenimo parametre poteze.
+  \item Relaksacija poteze.
+  \item Izračunamo novo energijo slike.
+\end{enumerate}
+%
+Podrobnosti implementacije so v poglavju 8.1. Na tem mestu omenimo naslednja dva aspekta implementacije:
+%
+\begin{itemize}
+  \item Pri postopku iskanja poteze izračunamo energijo slike brez te poteze. Na ta način je lahko predlagana sprememba brisanje poteze brez dodatnega stroška.
+  \item Postopek relaksacije bi bil zelo drag postopek in težek za implementacijo, če bi ga naredili eksaktno. Namesto tega uporabimo aproksimacijo za računanje energije zunaj relaksacijske zanke in izračunamo eksatno vrednost energije, ko je sprememba predlagana.
+\end{itemize}
+%
+% TODO Zahtevnost.
+%%
