@@ -29,6 +29,7 @@
 \renewcommand{\O}{\pazocal{O}}
 \renewcommand{\l}{\ell}
 \renewcommand{\L}{\mathfrak L}
+\newcommand{\CC}{\pazocal C}
 \newcommand{\LL}{\pazocal{L}}
 \newcommand{\I}{\pazocal{I}}
 \newcommand{\J}{\pazocal{J}}
@@ -39,11 +40,12 @@
 \newcommand{\argmin}{\textup{argmin}}
 \newcommand{\getvalue}[2]{#1 \gets #2}
 \newcommand{\iu}{{i\mkern1mu}}
+\renewcommand{\i}{\imath}
 
 %%% Definicije okolij za izreke ipd.
 {
    \theorembodyfont{\itshape}
-   \newtheorem{trditev}{Trditev}[chapter]
+   \newtheorem{trditev}{Trditev}[section]
    \newtheorem{izrek}[trditev]{Izrek}
    \newtheorem{lema}[trditev]{Lema}
    \newtheorem{izjava}[trditev]{Izjava}
@@ -124,14 +126,13 @@
 %--------------------------------------------------------------------
 %--------------------------------------------------------------------
 
-\author{Katarina Zadražnik} % FIXME Avtor
-\title{KatarinzArt} % FIXME Naslov
+\author{Katarina Zadražnik}
+\title{Likovno upodabljanje slik}
 
 %--------------------------------------------------------------------
 %--------------------------------------------------------------------
 
 \begin{document}
-
 \frontmatter
 \pagestyle{empty}
 
@@ -149,11 +150,11 @@
 \vfill
 
 \begin{center}
- {\LARGE Katarina Zadražnik} % FIXME Avtor
+ {\LARGE Katarina Zadražnik}
 
   \bigskip
   \medskip
-  {\bfseries {\Huge Likovno upodabljanje slik}} % FIXME Naslov magistrskega dela
+  {\bfseries {\Huge Likovno upodabljanje slik}}
 
   \bigskip
   \medskip
@@ -163,13 +164,13 @@
   \bigskip
   \medskip
   
-  {\Large Mentor: izred.\ prof.\ dr.\ Andrej Bauer} % FIXME Mentor
+  {\Large Mentor: prof.\ dr.\ Andrej Bauer}
 \end{center}
 
 \vfill
 \vfill
 \noindent
-{\Large Ljubljana, 2014} % FIXME Leto oddaje naloge
+{\Large Ljubljana, 2015}
 
 \cleardoublepage
 
@@ -180,7 +181,7 @@
 \vfill
 \noindent Podpisana {Katarina Zadražnik} izjavljam: % FIXME Avtor
 \begin{itemize}
- \item[--] da sem magistrsko delo z naslovom ?????????????????? izdelala samostojno pod mentorstvom {izred.\ prof.\ dr.\ Andreja Bauerja}, ter % FIXME Naslov, mentor in somentor, če je
+ \item[--] da sem magistrsko delo z naslovom Likovno upodabljanje slik izdelala samostojno pod mentorstvom {prof.\ dr.\ Andreja Bauerja}, ter % FIXME Naslov, mentor in somentor, če je
  \item[--] da Fakulteti za matematiko in fiziko Univerze v Ljubljani dovoljujem objavo elektronske oblike svojega dela na spletnih straneh.
 \end{itemize}
 Ljubljana, \today \hfill Podpis:\hspace{5cm} % Datum se nastavi na ``danes''
@@ -192,7 +193,7 @@ Ljubljana, \today \hfill Podpis:\hspace{5cm} % Datum se nastavi na ``danes''
 % ZAHVALA
 % TODO napiši zahvalo
 \chapter*{Zahvala}
-Tralala
+
 % FIXME Zahvala, če je (če je ni se zbriše vse do kazala)
 
 \cleardoublepage
@@ -223,7 +224,7 @@ Tralala
 %--------------------------------------------------------------------
 %--------------------------------------------------------------------
 % PROGRAM
-% TODO program dela (Bauer)
+
 \chapter*{Program dela}
 \addcontentsline{toc}{chapter}{\numberline{}Program dela}
 
@@ -232,20 +233,25 @@ Tralala
 \bigskip
 
 \begin{flushleft}
-  Ljubljana, datum % FIXME Kraj in datum programa dela
+  Kraj, datum % FIXME Kraj in datum programa dela
 \end{flushleft}
 
 \bigskip
 
 \begin{flushright}
-  izred.\ prof.\ dr.\ Andrej Bauer % FIXME Mentor
+  prof.\ dr.\ Mentor Mentorski % FIXME Mentor
   \quad 
+\end{flushright}
+
+\vspace{1cm}
+\begin{flushright}
+  prof.\ dr.\ Somentor Somentorski % FIXME Somentor, če je (če ga ni se zbriše vse od konca mentorja)
+  \quad
 \end{flushright}
 
 %--------------------------------------------------------------------
 %--------------------------------------------------------------------
 % POVZETEK
-% TODO napiši povzetke (na koncu bo itak to)
 \cleardoublepage
 \phantomsection
 \addcontentsline{toc}{chapter}{\numberline{}Povzetek}
@@ -255,7 +261,6 @@ Tralala
 {\Large \sc Povzetek}
 \end{center}
 % FIXME Povzetek
-Povzetek bo na koncu.
 
 \vfill
 \begin{center}
@@ -263,7 +268,6 @@ Povzetek bo na koncu.
 \end{center}
 % FIXME Abstract
 
-% TODO
 \vfill
 \noindent
 \textbf{Math.\ Subj.\ Class.\ (MSC 2010):} \texttt{XXXXXX}, \texttt{YYYYYY} % FIXME MSC, www.ams.org/msc/
@@ -278,30 +282,21 @@ Povzetek bo na koncu.
 %--------------------------------------------------------------------
 % POGLAVJA
 \mainmatter
-
 %\include{./poglavja/poglavje1}
-
 %\include{./poglavja/poglavje2}
-
 %\include{./poglavja/poglavje3}
-
-\include{./poglavja/Uvod}
-
+%\include{./poglavja/Uvod}
 \include{./poglavja/ObdelavaSlik}
-
-\include{./poglavja/papir}
-
+%\include{./poglavja/papir}
 \include{./poglavja/LikovnoUpodabljanjeSlik}
-
-\include{./poglavja/painterly}
-
-\include{./poglavja/voscenke}
-
-\include{./poglavja/svincnik}
+%\include{./poglavja/painterly}
+%\include{./poglavja/voscenke}
+%\include{./poglavja/svincnik}
 
 %--------------------------------------------------------------------
 %--------------------------------------------------------------------
 % BIBLIOGRAFIJA
+\backmatter
 
 % \phantom{\cite{*}}
 
@@ -317,7 +312,7 @@ Povzetek bo na koncu.
 {
 \raggedright
 \renewcommand{\markboth}[2]{}
-\bibliography{./literatura}
+\bibliography{literatura}
 }
 
 % Če so dodatki, se odkomentira spodnje tri vrstice
