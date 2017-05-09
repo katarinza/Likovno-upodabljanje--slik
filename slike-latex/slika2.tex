@@ -1,0 +1,28 @@
+\documentclass{minimal}
+\usepackage{tikz}
+\usepackage[active, pdftex, tightpage]{preview}
+\PreviewEnvironment{figure}
+\setlength\oddsidemargin{0in}
+%
+\begin{document}
+% slika 2
+\begin{figure}
+\begin{tikzpicture}
+% koordinate
+\draw[fill] (2,1) circle [radius=0.08];
+\node [below left] at (2,1) {$(x_0, y_1)$};
+\draw[fill] (3.5,1) circle [radius=0.08];
+\node [below right] at (3.5,1) {$(x_1, y_1)$};
+\draw[fill] (2,2.5) circle [radius=0.08];
+\node [above left] at (2,2.5) {$(x_0, y_0)$};
+\draw[fill] (3.5,2.5) circle [radius=0.08];
+\node [above right] at (3.5,2.5) {$(x_1, y_0)$};
+% oznake območij
+\node [below right] at (0, 4) {$A$};
+\node [below right] at (2, 4) {$B$};
+\node [below right] at (0, 2.5) {$C$};
+\node [below right] at (2.5, 2) {$D$};
+\end{tikzpicture}
+\end{figure}
+%
+\end{document}
