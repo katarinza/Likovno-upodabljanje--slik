@@ -1,20 +1,32 @@
-\chapter{Likovno upodabljanje slik}\label{sec:LikovnoUpodabljanjeSlik}
+\chapter{Likovno upodabljanje slik}\label{chp:LikovnoUpodabljanjeSlik}
 %
-Likovno upodabljanje slik (v nadaljevanju LUS) je področje v računalniški grafiki, ki se ukvarja z vprašanjem, kako realistični medij slike (lahko tudi video) pretvoriti v artistično likovno delo. V nasprotju z realističnim upodabljanjem, pri katerem je fokus na detajlih, pri LUS poskušamo upodobiti imanentne informacije. LUS ima zelo široko uporabo pri upodabljanju slik, risb, (tehničnih) ilustracijah, risanih animacijah \ldots V nasprotju s fotorealističnimi slikami imajo tako dobljena likovna dela namreč to prednost, da lahko likovni umetnik (ali tehnični risar) da poudarek na določen detajl slike, omeji količino podrobnosti, prilagodi paleto barv ali npr.\ doda sliki svojo osebno noto. Pri NPR-ju s pomočjo računalnika ustvarimo likovne umetnine, ki posnemajo določen likovni stil.
+Likovno upodabljanje slik (v nadaljevanju LUS) je področje v računalniški grafiki, ki se ukvarja z vprašanjem kako realistični medij slike pretvoriti v artistično likovno delo. V nasprotju z realističnim upodabljanjem, kjer je poudarek na podrobnostih, pri LUS poskušamo upodobiti imanentne informacije. LUS ima zelo široko uporabo pri upodabljanju slik, risb, tehničnih ilustracij, risanih animacij itd. V nasprotju s fotorealističnimi slikami imajo tako dobljena likovna dela namreč to prednost, da lahko likovni umetnik (ali tehnični risar) da poudarek na določen detajl slike, omeji količino podrobnosti, prilagodi paleto barv ali npr.\ doda sliki svojo osebno noto.
 
-NPR se je razvilo iz področja prepoznave določenih oblik na sliki in digitalne obdelave slik. V prejšnjem poglavju smo spoznali filtre za iskanje robov na sliki, zamegljenje \ldots V prvem razdelku si bomo sedaj pogledali primer artističnega filtra.
+LUS se je razvilo iz računalniškega področja prepoznavanja (geometrijskih) oblik na sliki in digitalne obdelave slik. Z razvojem filtrov za obdelavo slik, ki so sprva služili bolj kot npr.~orodje pri tehnični obdelavi medicinskih slik, se je sčasoma njihova uporaba razširila tudi v umetniške vode. Prišlo je do razvoja računalniškega poustvarjanja določenih li\-kov\-ni\-h stilov, kjer so izkoristili lastnosti in delovanje filtrov. 
 
-\section{Artistični filter}
-Primer.
-
+V prvem razdelku si bomo najprej pogledali primer uporabe filtrov za dosego nekega likovnega efekta na dani fotografiji. Ugotovili bomo, da uporaba filtrov, ki delujejo lokalno, ne pripelje do kompleksnih artističnih efektov. V preostalih razdelkih bomo zato spoznali različne načine za likovno upodabljanje slik, kjer se bomo poslužili modelov čopiča, svinčnika in voščenke ter med drugim uporabljali tudi optimizacijski pristop za slikanje in ustvarjanje mozaikov. V vsakem razdelku bomo navedli nekaj osnovnih člankov in njihovih povzetkov, na podlagi katerih si lahko bralec ustvari predstavo o bogatem dogajanju na področju LUS.
+%%
+%%
+%%
+\section{Artistični filter}\label{sec:ArtisticniFilter}
+%
 Obstaja tudi vrsta komercialnih programov, ki ustvarjajo slike s pomočjo artističnih filtrov, npr.\ Adobe Photoshop.
 %%
-\section{Splošni pregled dela na področju LUS}\label{SplosniPregled}
+%%
+%%
+\section{Tehnične ilustracije}
 %
-V tem poglavju bomo naredili pregled dela na področju likovnega upodabljanja slik.
-%
-\subsection{Ilustracije}
-Seligmann in Feiner sta opisala metodo za avtomatično konstruiranje ilustracij, s katerimi bi dosegli določeni cilj \cite{Seligmann:Automated}. Njihov osnovni cilj je high-level of compositing the best model for comunicatting a particular intent. Yessios je opisal prototip sistema za upodabljanje materialov v arhitekturnih načrtih, kot so kamni, les, rože in tla. Namesto mehaničnega videza želijo ilustracijo prikazati z nežnejšimi potezami. % TODO nežnejšimi ;)
+\emph{Tehnična ilustracija} je
+
+\begin{figure}[htb]
+  \includegraphics[width=0.49\textwidth]{./slike/real.png}
+  \ \ 
+  \includegraphics[width=0.49\textwidth]{./slike/npr.png}
+  \caption{Razlika med realističnim upodabljanjem in likovnim upodabljanjem.}
+\end{figure}
+ 
+Leta 1991 sta Seligmann in Feiner v \cite{Seligmann:Automated} opisala metodo za avtomatično konstruiranje 3D %BAUER Ali je 3D v matematičnem načinu 
+ilustracij. Ustvarjanje ilustracij poteka znotraj sistema stilističnih pravil in tehničnih zahtev, ki določajo končni videz ilustracije in jih lahko izbere uporabnik programa. Njun sistem Njihov osnovni cilj je high-level of compositing the best model for comunicatting a particular intent. Yessios je opisal prototip sistema za upodabljanje materialov v arhitekturnih načrtih, kot so kamni, les, rože in tla. Namesto mehaničnega videza želijo ilustracijo prikazati z nežnejšimi potezami. % TODO nežnejšimi ;)
 Miyata \cite{Miyata:Stone} je opisal algoritem za upodabljanje vzorcev kamnitih sten. Appel je z soavtorji v \cite{Appel:Haloed} predstavil metodo, s katero narišemo črto, ki ima videz, da gre zadaj za drugo. Kamada in Kawai \cite{Kamada:Hidden} sta posplošila nuno delo in ppredstavila različne parametre črte, kot so črtkanost, pikčastost, \ldots, s pomočjo katerih lahko skrite črte vizualno boljše predstavimo. Dooley in Cohen sta kasneje v \cite{Dooley:Lines, Dooley:Surfaces}  predstavila še več parametrov linij, kot je npr.\ debelina črte in podala diskusijo o načinu uporabnikove interakcije, da bi izboljašlai likovni vtis ilustracij, pri čemer bi obravnavali obliko objekta (linije, ki ga določajo) in njegovo senčenje.
 
 Saito in Takahashi sta v \cite{Saito:3Dshapes} predstavila koncept $G$-bufferja %TODO prevod za G-buffer
@@ -30,7 +42,7 @@ Salisbury je skupaj s sodelavci v \cite{Salisbury:OrientableTextures} predstavil
 
 Goodwin \cite{Goodwin:IsophoteDistance} s sodelavcama je predstavil pristop za določanje debeline črt v računalniško generiranih ilustracijah gladkih površin. Predpostavka, da se poudarjene črte rišejo na tistih območjih slike kjer je temnejše senčenje, jih je vodila do preproste formule za debelino linij, ki omejujejo objekte in tistih linij, ki sugestirajo detajle na objektih. Formula je odvisna od globine, ukrivljenosti in smeri svetlobe. Za upodabljanje linij uporabijo lokalno obliko in relacijo globine.
 
-\subsection{Risbe}
+\section{Risbe}
 Risbe so med osnovnimi likovnimii komunikacijami, ki človeku pomagajo v možganih reproducirati vhodno sliko risbe. Risanje s svinčnikom lahko razdelimo v dve skupini glede na vhodne podatke. te lahko namreč dobimo kot 2D informacijo ali pa kot 3D model. Glavna likovna stila, ki ju s svinčnikom poskušamo upodobiti sta skica ()%TODO povej kaj je skica
 in hatching (z risanjem na istem mestu v enakih ali različnih smereh poskušamo doseči določeni ton slike). % TODO prevode
 Sousa in Buchanan \cite{Sousa:Model} sta predstavili modele za grafit, papir za risanje, radirke. S temi modeli predstavi  teksturo, ton in %TODO popravi
@@ -44,7 +56,7 @@ V \cite{Lake:Stylized} je bil predstavljen model senčenja. Različne hatching s
 Mao s sodelavci v \cite{Mao:Automatic} so predstavili postopek za lokalno strukturo orientacije na podlagi vhodne slike in vključili linearno integracijsko konvolucijo (LIC) z namenom simulacije efekta senčenja. Yamamoto pa je s sodelavci v \cite{Yamamoto:Filter} je razdelil vhodno sliko na plasti z različnimi toni v različnih obsegih. Li in Huang \cite{Li:Feature} sta uporabila geometrijske parametre, from ... % TODO lepi članek poglavje 2
 %
 % TODO kod bodo mozaiki omenjeni
-\subsection{Painterly rendering}
+\section{Painterly rendering}
 Cohen \cite{Cohen:Aaron, Morbey:Aaron} se je problema risanja oz.\ slikanja lotil z vidika umetne inteligence. Ustvaril je sistem Aaron, ki na podlagi množice randomiziranih pravil ustvari originalno kompozicijo v določenem artističnem stilu. Aaron ima na voljo tudi robotsko slikanje.
   
 Haeberli je v \cite{Haeberli:PaintNumbers} predstavil interaktivni sistem za slikanje, ki ustvari impresionistično sliko iz fotografije. Poteze čopiča je upodobil v vrstnem redu. Vsaka poteza je imela parametre (položaj, barva, velikost in oblika), ki so bili večinoma določeni interaktivno, tj.\ s pomočjo uporabnika. Shiraishi in Yamaguchi \cite{Shiraishi:LocalSource} določata orientacijo in obliko potez čopiča na podlagi lokalnih značilnosti vhodne slike. Curtis in ostali avtorji so v \cite{Curtis:Watercolor} predstavili semi-avtomatski algoritem za upodabljanje watercolor slik. %TODO prevod za watercolor
