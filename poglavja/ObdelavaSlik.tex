@@ -654,17 +654,17 @@ Naj bosta $N_1$ in $N_2$ števili potence 2. Z uporabo računanja od zgoraj name
 %
 \emph{Signali} so funkcije ene ali več spremenljivk, ki nam posredujejo določene informacije o nekem fizikalnem pojavu, npr.\ podatke o zvočni frekvenci glasbila. Podatke, ki bi jih želeli dobiti iz vhodnega signala, največkrat ne dobimo direktno, temveč moramo vhodni signal pred njegovo analizo pretvoriti v nek drug sistem oz.\ zapis. Matematično povedano, na funkciji (matematični predstavitvi signala) moramo izvesti neko transformacijo. Predstavitev signala s funkcijo in transformacije, ki jih izvedemo na tej funkciji, so odvisne od lastnosti, ki jim preučevani signal ustreza (periodičnost, končnost, zveznost \ldots).
 %
-% TODO iz [0, 255], ker je digitalna slika
-Slika je signal, ki ga uvrščamo v skupini diskretnih in digitalnih signalov. Če imamo sivinsko sliko, potem je osnovna predstavitev signala $n \times m$ matrika, ki ima vrednosti elementov z intervala $[0, 1]$. Pri tem sta $n$ višina in $m$ širina slike, vrednosti elementov pa nastavimo na vrednosti pripadajočih slikovnih točk. Sliko bomo označili z $I$, njene slikovne točke pa z $I(x, y)$.
+Slika je signal, ki ga uvrščamo v skupini diskretnih in digitalnih signalov. Če imamo sivinsko sliko, potem je osnovna predstavitev signala $n \times m$ matrika, ki ima vrednosti elementov z intervala $[0, 1]$. Pri tem sta $n$ višina in $m$ širina slike, vrednosti elementov matrike pa nastavimo na vrednosti pripadajočih slikovnih točk. Sliko bomo označili z $I$, njene slikovne točke pa z $(x, y)$.
 
 \emph{Transformacijo slike} $I$ bomo označili s $T$ in jo definirali kot:
 %
-$$T: I(x, y) \to J(u, v).$$
+$$\fun{T}{I(x, y)}{J(u, v)}.$$
 %
+Izhodno sliko transformacije $T$ bomo označili z $J$, njene slikovne točke pa z $(u,v)$. Kadar bomo uporabili druge oznake, bomo to posebaj povedali.
 Obravnavali bomo tri skupine transformacij:
 %
 \begin{enumerate}
-\item točkovne transformacije (izhodna vrednost transformacije je odvisna le od ene vrednosti; ni nujno, da uporabimo pri izračunu vrednosti; 
+\item točkovne transformacije (izhodna vrednost transformacije $T$ je odvisna le od vrednosti ene slikovne točke); 
 \item lokalne transformacije (izhodna vrednost transformacije $T$ je odvisna od vseh vrednosti v soseski pripadajoče slikovne točke vhodne slike);
 \item globalne transformacije (izhodna vrednost transformacije $T$ v točki $(x, y)$ je odvisna od vseh vrednosti vhodne slike).
 \end{enumerate}
@@ -673,7 +673,7 @@ V nadaljevanju bomo spoznali posamezne skupine teh transformacij in njihovo prak
 %
 \subsection{Točkovne transformacije}
 %
-Točkovne transformacije pri izračunu vrednosti $T(x, y)$ uporabijo le podatek o vrednosti slikovne točke $(x, y)$ (glej sliko \ref{fig:tockovnaT}). Za izračun točkovne transformacije $T$ na $n \times m$ veliki sliki $I$ porabimo $\O(k\cdot nm)$ časa, pri čemer je $O(k)$ časovna zahtevnost izračuna vrednosti $T(x, y)$ za eno slikovno točko. Ker za izračun potrebujemo le vrednost dotične slikovne točke, lahko izvedemo računanje na mestu, torej pri računanju ne potrebujemo dodatnega pomnilnika.
+Za izračun vrednosti $T(x, y)$ pri točkovni transformaciji potrebujemo le podatek o vrednosti ene izmed slikovnih točk $I$ (glej sliko \ref{fig:tockovnaT}). Za izračun točkovne transformacije $T$ na $n \times m$ veliki sliki $I$ porabimo $\O(k\cdot nm)$ časa, pri čemer je $O(k)$ časovna zahtevnost izračuna vrednosti $T(x, y)$ za eno slikovno točko. Ker za izračun potrebujemo le vrednost dotične slikovne točke, lahko izvedemo računanje na mestu, torej pri računanju ne potrebujemo dodatnega pomnilnika.
 
 %
 \begin{figure}[htbp]
@@ -685,7 +685,7 @@ Točkovne transformacije pri izračunu vrednosti $T(x, y)$ uporabijo le podatek 
 %
 
 Enostavni primeri točkovnih transformacij so: rotacija slike, zrcaljenje, skrčitev, \ldots % TODO une weird k swirl itd. dodaj
-Za nas pomembne točkovne transformacije so tiste, ki spreminjajo barve itd. %TODO lepo napiši to
+V poglavju \ref{sec:barvnimodeli} si bomo pogledali barvne modele in opisali (točkovne) transformacije, s pomočjo katerih lahko slike zapišemo v različnih barvnih prostorih.
 %% Lokalne transformacije
 \subsection{Lokalne transformacije}\label{sec:LokalneTransformacije}
 %
@@ -900,6 +900,7 @@ O spektru in faznem zamiku bomo govorili v nadaljevanju, saj sta to informaciji,
 %
 %%
 \section{Barvni modeli}
+\label{sec:bravnimodeli}
 Poznamo različne barvne modele:
 %
 \begin{itemize}
