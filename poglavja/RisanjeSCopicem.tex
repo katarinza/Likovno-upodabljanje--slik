@@ -1,12 +1,225 @@
 \chapter{Likovno upodabljanje s potezami}
 %
-Likovno upodabljanje s potezami (\emph{kratica} LUP) je skupni pojem za skupino likovnih upodabljanj slik pri katerih na risalno podlago (platno) na predpisan način postavljamo diskretne elemente. Ti so lahko npr.~poteze čopiča, pike, trikotniki in kvadratki ali tudi mozaične ploščice (skupno ime za vse te elemente bo kar poteze).
+Likovno upodabljanje s potezami (\emph{kratica} LUP; \emph{angl.~stroke--based rendering}) je skupni pojem za likovna upodabljanja slik, pri katerih na risalno podlago na predpisan način postavljamo diskretne elemente. Diskretni elementi so lahko poteze čopiča, pike, kvadratki, mozaične ploščice \ldots
 
-Algoritmi, ki jih bomo uporabili za LUP, bodo večinoma potekali v dveh fazah. V prvi fazi bomo postavili poteze na platno, nato pa bomo v drugi fazi poteze na platnu upodobili, s čemer bomo dosegli likovno dodelano sliko. Skupni cilj pri LUP je upodobitev slike, ki bo imela določen slikarski stil, bo po stilu podobna znanemu stilu nekega slikarja ali pa imela povsem abstrakten aspekt. Postavitev potez na platno je običajno taka, da je slika čimbolj podobna fotografiji. Slednje enostavno dosežemo tako, da na platnu upodobimo % TODO na platnu ali na platno?
-ogromno majhnih potez. Na ta način bomo dobili zelo dobro ujemanje s fotografijo, lahko pa tudi pridobili nezaželen učinek umetnega videza in izgubili abstraktnost in likovnost slike. Zato bomo pri algoritmih zahtevali še omejitev števila potez, njihove oblike, velikosti in barve.
+Cilj SBR je taka postavitev diskretnih elementov na risalno podlagi, ki bo zadostila našim pogojem in ciljem. Skupni cilj je, da s postavitvijo diskretnih elementov na risalno podlago skušamo ustavariti sliko, ki bo po stilu čimbolj podobna nekemu stilu oz.\ bo nosila določen slikarski stil. Po drugi strani želimo, da naša slika ne deluje preveč umetno, potrebno je tudi omejeiti na nek način število diskretnih elementov, njihovo obliko, barvo, \ldots
 
-Prav tako kot je to storil Hertzmann v~\cite{Hertzmann}, % TODO CITIRAJ UN ČLANEK K JE VSE NOTER OD hERTZMANNA
-bomo tudi mi razdelili LUP v dve glavni skupini. V prvem razdelku tega poglavja bomo opisali skupino LUP, pri katerih obliko, velikost, barvo in položaj poteze na platnu določimo po vnaprej določenem pravilu. Za upodabljanje bomo uporabljali požrešno metodo in razvili naraven pristop k slikanju. Druga skupina algoritmov pa uporablja optimizacijske metode. Te bomo opisali v drugem razdelku in videli, da z njimi lahko izboljšamo kakovost slike, vendar pa veliko izgubimo na časovni zahtevnosti. Predstavili bomo tudi mozaike, za katere je optimizacijski pristop naraven način likovnega upodabljanja. V zadnjem razdelku pa bomo predstavili naše implementacije nekaterih algoritmov in naredili njihovo kratko analizo skupaj s primeri. 
+Algoritem v splošnem poteka v več fazah:
+%
+\begin{enumerate}
+\item postavitev diskretnih elemntov na risalno podlago;
+\item rendiranje diskretnih elementov.
+\end{enumerate}
+%
+Najprej definirajmo pojma strokesa in podatkovno strukturo slika.
+%
+\begin{definicija}
+Strokes je podatkovna struktura, ki jo lahko rendiramo. Model strokesa je opis strokesa, ki nosi podatke o obliki, poziciji in parametrih za njegovo rendiranje.
+\end{definicija}
+% 
+Strokesi, ki jih bomo uporabljali mi, bodo več vrst:
+%
+\begin{itemize}
+\item pike (model pike: radij, center, barva);
+\item poteze s čopičem (enostavnejši in bolj bogat model - opisa sledita kasneje);
+\item ploščice, ki potrenujemo pri mozaikih;
+\item trganke (trganke iz revije).
+\end{itemize}
+%
+\begin{definicija}
+Struktura slike je podatkovna struktura, ki vsebuje:
+\begin{itemize}
+\item Platno, na katerega bomo slikali (barva platna in njegova struktura);
+\item Urejen seznam strokesov, ki jih določajo parametri.
+\end{itemize}
+\end{definicija}
+%
+Sedaj potrebujemo še oceno, ki nam bo povedala kako dobra je struktura slike, glede na cilje, ki smo si jh zadali.
+%
+\begin{definicija}
+SBR energijska funkcija je funkcija $\fun{E}{I}{R}$, pri čemer je $I$ množica vseh možnih struktur slike in $R$ množica relanih vrednosti.
+\end{definicija}
+%
+Intuitivno lahko gledamo na energijsko funkcijo kot na merilo, ki nam pove, kako dobro narisana je slika. Cilj SBR-ja je naslikati sliko, ki bo imela čimmanjšo možno vrednost energije. Naš cilj pri risanju je, da bi dano sliko čimbolje narisali, torej da bo naša končna slika čimboljši približek originalne slike. To je enostavno doseči tako, da na risalno podlago naslikamo čimveč majhnih strokesov. Na ta način bomo dobili zelo dobro ujemenje. Na ta način bomo torej dobili zelo dober približek originalne slike. Ne bomo pa dosegli umetniškega cilja. Namreč, da bi poustavrili določen slikarski stil. Zato poleg zahteve, da dobimo čimboljšo ujemanje slike, dodamo zraven motnje, omejimo število strokesov, njihovo velikost itd.\ 
+
+Z energijsko funkcijo bomo torej določili slikarski stil. Slikarski stil lahko definiramo kot sledi:
+%
+\begin{definicija}
+SBR stil je model strokesa skupaj z energijsko funkcijo (vključujoč vrednosti parametrov) preko strukture slike.
+\end{definicija}
+%
+Z drugimi besedami, SBR algoritem ustvari sliko z določenim stilom tako, da minimizira določeno energijsko funkcijo.
+
+Glede na postavljanje strokesov na risalno podlago, ločimo dve glavni vrsti SBR algoritmov:
+%
+\begin{enumerate}
+\item optimizacijski algoritmi;
+\item požrešni algoritmi.
+\end{enumerate}
+%
+V nadaljevanju si bomo pogledali algoritme iz obeh sklopov. Delo je povzeto po doktorski disertaciji od strica Hertzmanna.
+%%
+\section{Optimizacijski algoritmi}
+%
+Pri požrešni metodi smo poteze postavljali na platno po vnaprej določenem pravilu. Ko smo potezo enkrat postavili na platno, je nismo več spreminjali. Opazimo pa, da bi bilo večkrat za dosego lepše slike bolje, da bi neki potezi spremenili obliko in barvo ali pa jo celo odstranili. Tak način razmišljanja uporablja optimizacijski pristop k likovnemu upodabljanju s potezami, ki ga bomo spoznali v tem razdelku.
+
+Najprej moramo uvesti matematično merilo, ki bo za dano trenutno postavitev potez na platnu $J$ izmerilo njeno kvaliteto.
+%
+\begin{definicija}
+\emph{LUP energijska funkcija} je funkcija $\fun{E}{\J}{\R}$, kjer je $\J$ množica vseh možnih slik.
+\end{definicija}
+%
+Glavni dve merili, ki ju bomo upoštevali pri računanju vrednosti energijske funkcije, sta število potez in ujemanje slike $J$ z vhodno sliko $I$. Seveda bi lahko z ogromnim številom majhnih potez zelo dobro aproksimirali vhodno sliko $I$, vendar pa ne bi dobili likovno zadovoljivega rezultata. Pri optimiziranju skušamo doseči, da neko sliko aproksimiramo z manjšim številom potez. Na ta način v sliko vnesemo abstrakcijo in željeni likovni pridih. Osnovna energijska funkcija, ki jo bomo optimizirali, bo:
+%
+\begin{align*}
+E(J) & = E_p(J) + w_n \cdot E_n(J), \\
+E_p(J) & = \sum_{(x, y) \in J} \norm{J(x, y) - I(x, y)}^2, \\
+E_n(J) & = \textup{število potez na sliki }J.
+\end{align*}
+%
+S parametrom $w_n$ nadziramo abstrakcijo slike. Uporaba majhne vrednosti parametra $w_n$ pomeni, da bomo pri slikanju uporabili veliko število potez, posledično bomo dobili likovna dela, ki bodo verjetno bolj ali manj podobna začetni vhodni sliki $I$. Za dosego bolj likovno estetskega rezultata bomo torej običajno uporabljali večje vrednosti parametra $w_n$, saj bomo na ta način zmanjšali število končnih potez.
+
+Izbira energijske funkcije, ki jo bomo uporabili pri optimiziranju, skupaj z modelom poteze določa \emph{stil slike}. Določen stil slike dobimo torej tako, da minimiziramo energijsko funkcijo.
+%
+\begin{opomba}
+Energijsko funkcijo lahko izberemo tudi kot merilo za kvaliteto sliko, ki jo dobimo pri slikanju s požrešno metodo.
+\end{opomba}
+%
+Kljub temu, da bomo pri slikanju na optimizacijski način dobili veliko boljši rezultat kot pri požrešni metodi, pa tak način slikanja ni naraven. Slikar namreč na platnu ponavadi neke poteze, ko jo naslika na platno, običajno ne more več spreminati. Minus je tudi ta, da bo čas likovnega upodabljanja v nekaterih primerih drastično narastel (če bi pri požrešni metodi porabili pet minut, se kaj lahko zgodi, da bomo pri optimiziranju za dosego podobnega stila pri isti vhodni sliki potrebovalii pet ur). Optimizacijski pristop po drugi strani pri svojem ustvarjanju uporabljajo sestavljalci mozaiki. Sestavljalec najprej na podlagi s prestavljanjem, izbiro ploščiš druge barve in spreminjanjem oblike ploščic sestavi željeno sliko, nato pa ploščice zacementira.
+
+V podrazdelkih, ki sledita, bomo opisali dva optimizacijska pristopa. Prva skupina algoritmov, ki jo bomo opisali, so Voronojevi algoritmi. Z njimi bomo pokazali kako lahko sestavimo mozaik. Nato bomo spoznali še izkustvene algoritme, pri katerih bomo uporabljali hevristično izbrane teste, s pomočjo katerih bomo minimizirali energijsko funkcijo. Voronojevi algoritmi imajo boljšo časovno zahtevnost, ampak je ne moremo prilagoditi različnim vrstam problemov. Medtem ko imajo izkustveni algoritmi slabšo časovno zahtevnost, pa jih lahko z izbiro energijske funkcije in parametrov prilagodimo različnim problemov in poustavrimo veliko več likovnih stilov.
+%
+%% Voronojevi diagrami
+\subsection{Voronojevi algoritmi}
+%
+Pri razvoju Voronjevega algoritma za LUP, si bomo pomagali z znanjem računske geometrije. V primeru, ko bomo na podlago postavljali neprekrivajoče se poteze s podobno obliko, bomo videli, da lahko problem prevedemo na znan Voronojev diagram. Metoda, ki jo bomo predstavili v našem delu, je bila preedstavljena v članku \cite{Hausner}.
+%
+\subsubsection{Lloydova metoda}
+Množico enakomerno razporejenih diskretnih elementov na risalni podlagi bomo določili s pomočjo iterativnega optimizacijskega postopka, ki bo minimiziral predpisano energijsko funkcijo. Naj bo $p = (x, y)$ slikovna točka in označimo s $C_i$ posebno slikovno točko, ki ji pravimo \emph{center}. Diskretne elemente bomo postavili na sliko tako, da bodo imeli središča v centrih. Naj bo $L_p^i \in \set{0, 1}$ označitev slikovnih točk, pri čemer $L_p^i = 1$ pomeni, da slikovna točka $p$ pripada centru $C_i$. Vsaka slikovna točka pripada natanko enemu centru, veljati mora $\sum_p L_p^i = 1$.
+
+\textbf{Naloga:} Izbira množice centrov in označitve slikovnih pik, ki minimizira naslednjo energijsko funkcijo \footnote{Pri NPR-ju velikokrat namesto diskretne verzije izberejo zvezno verzijo problema. Ker pa je diskretni problem bližje realnemu problemu in za ta primer lahko pokažemo konvergenco algoritma, bomo mi izbrali diskretno verzijo problema.}:
+%
+\begin{align*}
+E(I) & = \sum_{p \in I} L_p^i \norm{p - C_i}^2 \\
+       & = \sum_{p \in I} L_p^i ((p_x - C_{i, x})^2 + (p_y - C_{i, y})^2) .
+\end{align*}
+%
+Z drugimi besedami, vsaki slikovni točki želimo pripisati center, ki ji je najbližji. Če bi poznali množico centrov vnaprej, bi optimalno označitev enostavno izračunali tako, da bi vsaki slikovni točki pripisali njej najbližji center. Slednjo nalogo poznamo pod imenom Voronojev diagram. Več o Voronojevem diagramu si lahko preberemu v \cite{voronoi}.
+
+Kot je razvidno iz slike \ref{slika1a}, naključna izbira centrov ne bo dala zadovoljivega rezultata. Izboljšava, ki jo lahko naredimo je ta, da spremenimo položaje centrov. Energijsko funkcijo želimo optimizirati samo glede na množico centrov, zato moramo rešiti enačbo $\frac{\partial E(I)}{\partial C_i} = 0$. Nove položaje centrov izračunamo torej po formuli
+%
+$$C_i = \frac{\sum_p L_p^i p}{\sum_p L_p^i}.$$
+%
+Zgornja formula nam da srednjo vrednost vseh položajev slikovnih točk, ki smo jih na začetku pripisali določenemu centru. Zatem, ko spremenimo množico centrov, zopet na novo izračunamo označitev. Ponavljanje zgoraj opisanih korakov poznamo pod imenom Lloydova metoda. Psevdokoda Lloydeve metode je predstavljena v algoritmu \ref{alg:Lloyd}.
+%
+% TODO Algoritem
+%
+Na sliki \ref{slika1b} je prikazana množica centrov in Voronojev diagram po tem, ko na prvotni množici centrov uporabimo Lloydovo metodo. Pravimo, da zgornji algoritem konvergira, ko se vrednost energijske funkcije med posameznima korakoma optimizacije ničveč ne spreminja. na vsakem koraku se bo vrednost energijske funkcije kvečjemu zmanjšala, saj na vsakem koraku energijsko funkcijo minimiziramo glede na določene parametre. Metoda bo zagotova konvergirala, saj je na voljo le končno mnogo kombinacij množic centrov in označitev slikovnih pik, na vsakem koraku pa se vrednost energijske funkcije kvečjemu zmanjša.
+% TODO Tukaj še povej, da je to počasi pa nekaj kdo je to odkril, pa da je hardware pomemben za hitrost.
+\subsubsection{Prilagojena Lloydova metoda za reševanje problema SBR}
+Sedaj, ko imamo na voljo algoritem, ki nam enakomerno razporedi centre na sliki, lahko Lloydovo metodo prilagodimo tako, da jo bomo uporabili za rešitev problema SBR. Najosnovnejši problem SBR, ki ga obravnavamo je taka postavitev točk na sliko, ki bo čimbolje aproksimirala dano črnobelo sliko. Za ta problem obstajajo že rešitev % TODO
+Poglejmo si rešitev, ki jo je predstavil \ref{Sec02}. Namesto, da spreminjamo velikost narisanih točk, spreminjamo njihovo gostost. Uporabili bomo funkcijo ploskovne gostote $\rho(p)$, ki bo določala gostost točk na posameznih območjih vhodne slike. Funkcijo ploskovne gostote izpeljemo iz vhodne slike $T(p)$, ki smo jo predhodno pretvorili v črnobelo, po formuli
+$$\rho(p) = 1 - \frac{T(p)}{m},$$
+kjer je $m$ največja vrednost slike $T$. Nova energijska funkcija za ta problem se glasi
+%
+\begin{align*}
+E(I) & = \sum_{p \in I} L_p^i \rho(p) \norm{p - C_i}^2 \\
+       & = \sum_{p \in I} L_p^i \rho(p) ((p_x - C_{i, x})^2 + (p_y - C_{i, y})^2).
+\end{align*}
+%
+Podoben razmislek kot pri navadni Lloydovi metodi nas pripelje sedaj do nekoliko spremenjene Lloydove metode. Postopek označitve slikovnih točk ostane isti kot prej. Ker smo vsaki točki s funkcijo ploskovne gostote pripisali utež, moramo pri računanju novih centrov te uteži upoštevati. Namesto običajne srednje vrednosti, bomo torej morali za posamezne centre vzeti uteženo povprečje slikovnih točk iz pripadojoče celice. Nove centre izračunamo po formuli
+%
+$$C_i = \frac{\sum_p L_p^i \rho(p)p}{\sum_p L_p^i \rho(p)}.$$
+%
+Računanje novih centrov lahko pohitrimo tako, da vsote uteži, ki nastopajo v imenovalcih, izračunamo vnaprej. S to metodo dobimo ostrejše robove na sliki, saj je gostota točk odvisna od tonske slike. % TODO Secord je uporabljal tudi neko drugo določitev začetnih točk.
+
+Lloydovo metodo pa lahko uporabimo tudi za sestavljanje mozaikov na podlagi dane barvne vhodne slike. Preprosti pristop, ki ga lahko uporabimo pri mozaiku je, da izračunamo Voronojev diagram in za barve posameznih celic uporabimo barvo, ki jo ima center na vhodni sliki. Ta pristop ni najbolšji, saj pri njem dobimo mozaik, ki ima preveč nepravilne oblike ploščic.
+
+Hausner \ref{Hau01} opisuje dve izpopolnitvi metode. Najprej naodmestimo evklidsko razdaljo oz.\ $L_2$ normo z $L_1$ normo ($\norm{v}_1 = \abs{v_x} + \abs{v_y}$). Druga izboljšava je določitev vektorskega polja $\Phi(p)$ sliki, da dobimo konsistentno orientacijo ploščic pri končnem mozaiku. Na ta način ploščicam v mozaiku pripišemo smer, $\phi_i = \Phi(C_i)$. Nova energijska funkcija je enaka
+%
+\begin{align*}
+E(I) = \sum_{p \in I} L_p^i \norm{R_{\Phi(C_i)} (p - C_i)}_1^2,
+\end{align*}
+%
+kjer je $R_{\Phi(C_i)}$ rotacijska matrika s smerjo $\Phi(C_i)$. Psevdokoda novega algoritma je povzeta v \ref{}.
+% TODO Algoritem TileMosaic
+%
+Zgornji algoritem ni več optimizacijski, kajti posamezen korak pri optimizaciji ne bo dal nujno boljše rešitve. Še več, zgornji algoritem pri postavitvi ploščic ne upošteva barve ploščic, temveč barvo ploščicam priredi šele, ko so znani končni položaji ploščic. Čeprav teoretično izgleda, da algoritem ni najboljši, pa se v praksi izkaže, da z njim dobimo zadovoljivo dobre rezultate.
+
+Tlakovanje lahko prilagodimo tako, da ročno razdelimo območja slike in posamezna območja tlakujemo neodvisno (izberemo lahko različne parametre, npr.\ velikosti ploščic). Iz prvotne slike lahko odstranimo tudi robove, na ta način se izognemo temu, da bi ploščica imela center na katerem izmed robov, kajti to poslabšuje kvaliteto mozaika.
+%
+\subsection{Izkustveni algoritmi}
+Voronojev algoritem se ne da lahko razširiti tako, da bi upošteval tudi barvo ploščic in obravnaval dejstvo, da se lahko diskretni elementi tudi prekrivajo. Trenutno so edini algoritmi, ki znajo upoštevati tudi to, \emph{izkustveni algoritmi}. Izkustevni algoritem lahko uporabimo za reševanje kateregakoli SBR problema.
+
+\textbf{Ideja:} Na vsakem algoritmu je predlagana nova sprememba za že postavljeno strukturo. V primeru, ko je sprememeba takšna, da zmanjša vrednost energijski funkciji, sprememebo izvedemo, sicer jo zavržemo.
+
+Če je sistem, ki predlaga na vsakem koraku algoritma novo spremembo, dobro zasnovan, potem bo algoritem konvergiral k rešitvi, ki bo imela nizko vrednost energijske funkcije. Zagotovila, da bomo prišli do take rešitve, pa pri tem novem algoritmu nimamo. Prav tako nimamo zagotovila, da bomo prišli do primerne rešitve v nekem zadovoljvio majhnem času. V algoritmu \ref{trialanderror} je povzeta psevdokoda za izkustveni algoritem.
+%
+% TODO algoritem za izkustveni alg
+%
+V zgornjem algoritmu pri zanki nismo uporabili določenega zaustavitvenega pogoja, namreč pustimo, da zaustavitveni pogoj določi uporabnik. Glavna naloga pri tem algoritmu je, da postavimo dober sistem za predlaganje sprememb. Naključna izbira novih sprememb bi povzročila trošenje časa za to, da bi sistem predlagal rešitve, ki ne bi ničesar doprinesle k boljšemu rezultatu. Zato je bolje, da vzpostavimo polavtomatičen sistem, v katerem lahko uporabnik predlaga nove spremembe. Izkustevni algoritmu so v resnici podobni požrešnim algoritmom, pri obojih namreč za boljši rezultat uporabimo polavtomatiziran sistem. Kakorkoli, pri izkustvenem algoritmu se bo sprememba zgodila le, če bo nova sprememba doprinesla k boljšemu rezultatu. Pri izkustvenem algoritmu torej ni potrebno poskrbeti za to, da algoritem avtomatično ustvari nov diskretni element, ki bo pripomogel k boljšemu mozaiku.
+
+Haeberli \ref{Hae90} je predstavil prvi izkustveni algoritem za likovno upodabljanje slik. Na vsakem koraku je izvedel spremembe določenega števila diskretnih elementov, izvedene spremembe nato ohrani, če je vsota kvadratov razlik glede na vhodno sliko zmanjšana.   
+%
+\subsubsection{Slikovno renderiranje z izkustvenim algoritmom}
+Heartzman je izkustveni algoritem uporabil za slikovno renderiranje. Naloga je poiskati sliko, ki se bo čimbolje ujemala z vhodno sliko, bo v celoti pokrita z barvo in bo uporabljala čimmanj potez. Vsaka poteza je definirana z debelino čopiča in seznamom kontrolnih točk. Energijska funkcija, ki jo bomo minimizirali je dana z
+%
+\begin{align*}
+E(I) & = E_{app}(I) + E_{nstr}(I) + E_{cov}(I), \\
+E_{app}(I) & = \sum{p \in I} w_{app}(p) \norm{I(p) - S(p)}, \\
+E_{nstr}(I) & = w_{nstr} \cdot \textup{(število potez v $I$)}, \\
+E_{cov}(I) & = w_{cov} \cdot \textup{(število nepobarvanih slikovnih točk v $I$)}.
+\end{align*}
+%
+Zgornja energijska funkcija je linearna kombinacija treh drugih energijskih funkcij, ki uravnavajo posamezne zahteve. Prva funkcija $E_{app}$ nam pove koliko nova slika aproksimira vhodno sliko $S$. Število potez v drugi funkciji $E_{nstr}$ poskrbi, da število potez na sliki ni preveliko, zahteva je namreč čimmanjše število potez. Tretja funkcija $E_{cov}$ pa poskrbi za to, da nimamo na sliki nepobarvanih slikovnih točk. Uteži $w_{app}, w_{nstr}$ in $w_{cov}$ so parametri, ki jih lahko določi uporabnik. Uteži $w_{app}$ uporabnik določi tako, da predlaga uteženo sliko, iz katere preberemo vrednosti uteži za posamezno slikovno točko.
+
+Prvi dve funkciji uravnavata dve med sabo tekmovalni zahtevi: prva želi, da naredimo čimboljšo aproksimacijo prvotne slike, druga pa želi uporabiti čimmanj potez in s tem tudi čimamnj barve. Z uravnavanjem teh dveh parametrov lahko uporabnik doseže različne slikarske stile.
+
+V primeru, ko uporabnik ne predlaga utežene slike, bo algoritem za uteži $w_{app}$ izbral vrednosti, ki jih bo prebral iz binarne slike, ustvarjene s pomočjo Sobelovega filtra. ta način da poseben poudarek na robove slik, kljub temu, da dobimo zadovoljive rezultate tudi, če bi uporabili kar konstantno utež skozi celotno sliko. Če dovolimo, da se vrednost parametra $w_{app}$ spreminja skozi sliko, potem dobimo efekt, ki je podoben efektu, da imamo na različnih območjih slike drugačno energijsko funkcijo. Slika uteži $w_{app}(p)$ nam dovoljuje, da nadzorujemo koliko detajlov želimo na posameznih delih slike.
+
+% TODO Za nadaljne informacije glej doktorat oziroma nek članek paint by relaxation \ref{Her01}. 
+\textbf{Relaksacija poteze:} Osnovna strategija, ki jo uporabimo za sistem predlaganja novih sprememb, je uporaba \emph{relaksacija poteze}. Gre za adaptacijo snakes \ref{10, 2} na energijsko funkcijo: poišče aproksimacijo lokalnega minimuma za dani položaj poteze.
+
+High-level algoritem za modifikacijo poteze je:
+%
+\begin{enumerate}
+  \item Izračunamo energijo slike.
+  \item Izberemo eno izmed obstoječih potez.
+  \item Po potrebi spremenimo parametre poteze.
+  \item Relaksacija poteze.
+  \item Izračunamo novo energijo slike.
+\end{enumerate}
+%
+Podrobnosti implementacije so v poglavju 8.1. Na tem mestu omenimo naslednja dva aspekta implementacije:
+%
+\begin{itemize}
+  \item Pri postopku iskanja poteze izračunamo energijo slike brez te poteze. Na ta način je lahko predlagana sprememba brisanje poteze brez dodatnega stroška.
+  \item Postopek relaksacije bi bil zelo drag postopek in težek za implementacijo, če bi ga naredili eksaktno. Namesto tega uporabimo aproksimacijo za računanje energije zunaj relaksacijske zanke in izračunamo eksatno vrednost energije, ko je sprememba predlagana.
+\end{itemize}
+%
+\textbf{Opis individualnih postopkov za generiranje spremembe:}
+%
+\begin{itemize}
+  \item Dodajanje nove poteze: na podlagi izbrane točke na sliki ustvarimo novo potezo. Novo potezo vedno dodamo na konec seznama vseh potez (poteze narišemo na platno v vrstenm redu). Na način, ki je opisan v \ref{9} dodamo nove kontrolne točke. Novo potezo nato relaksiramo. Rezultat tega iskanja je nato predlog za novo spremembo na sliki.
+  \item Reaktivacija poteze: Dana poteza je relaksirana in sprememeba je nov predlog. Vendar pa v primeru, ko bi brisanje poteze iz slike energijo slike zmanjšajo bolj kot modifikacija poteze, potem potezo pobrišemo. Brisanje ene poteze ne vpliva na vrstni red potez. Na ta način bomo v postopku pobrisali poteze, ki so zadaj za ostalimi potezami, če za vključitev poteze na sliko obstaja kazen (tj.\ $w_{area} > 0$ ali $w_{nstr} > 0$).
+  \item Odebelitev poteze: Če je radij poteze pod maksimumom, potem povečamo njen radij. Potezo zatem reaktiviramo. To potezo sedaj damo kot nov predlog za spremembo.
+  \item Zoožanje poteze: Če je radij poteze nad minimumom, potem radij poteze zmanjašamo in potezo reaktiviramo.
+  \item Prebaravanje: Barvo poteze nastavimo na povprečno vrednost barv območja vhodne slike, ki ga obsega poteza. Potezo nato reaktiviramo.
+\end{itemize}
+%
+\textbf{Kombinacija korakov:} Individualne spremembe kombiniramo v zanke, da zagotovimo, da je vsaka poteza vsaj enkrat relaksirana.
+%
+\begin{itemize}
+  \item Postavitvena plast: Zanka preko slike, znotraj katere s pomočjo postopka \textit{Dodajanje poteze} dodamo novo potezo s predpisanim radijem in naključno spremenjeno začetno točko.
+  \item Splošna reaktivacija: Iteracija preko množice vseh potez v njihovem zaporedju in njihova \textit{Relaksacija}.
+  \item Odebeljenje/Zoožanje vseh potez: Za vsako potezo izvedemo postopek \textit{Odebelitve} dokler sprememba ni zavržena li pa poteza pobrisana. V primeru, ko poteza ostane nespremenjena izvedemo postopek \textit{Zoožitve} dokler ta sprememba ni zavrnjena lai pa poteza pobrisana.
+  \item Splošno prebarvanje: Iteriramo preko množice potez in uporabimo postopek \textit{prebarvanje}.
+  \item Skripta: Izvedi zaporedje relaksacijskih zank. Če želimo narediti sliko na novo, uporabimo naslednji algoritem:
+% TODO algoritem
+\end{itemize}
+%
+Običajno je $N=2$. Zgornja skripta običajno pripelje do konvergence. Opazimo, da relaksacijsko zanko izvedemo na vseh potezah, ne le teh, ki imajo trenutno velikost.
+% TODO Zahtevnost.
 %%
 \section{Požrešne metode}
 Požrešne metode so najbolj običajni algoritmi s katerimi slikamo. Strokese dodamo na strukturo slike in jih po tem ne spreminjamo več, kot smo to storili pri optimizacijskih algoritmih. Pri tej vrsti lagoritma nimamo energijske funkcije, ki bi dolačala stil slike, temveč moramo na pravi način postaviti strokese na strukturo slike. Seveda lahko zapišemo energijsko funkcijo, ki je naravna.
@@ -103,7 +316,7 @@ Za vsako plast $P_i$ najprej ustvarimo referenčno sliko, ki jo dobimo tako, da 
 \Require bla bla
 \Ensure tralalal
 \Function {Slikanje} {$S$, $[R_1, \ldots, R_n]$}
-  \State $P$ $\leftarrow$ pobarvamo z izbrano barvo
+  \State P $\leftarrow$ pobarvamo z izbrano barvo
   \For {$R_1, R_2 \ldots R_n$}
     \State $G$ $\leftarrow$ $S \ast G(f_{\sigma} R_i)$
     \State \Call {PobarvajPlast} {$P$, $G$, $R_i$}
@@ -368,315 +581,3 @@ Končno sliko izračunamo iz višinskega polja in osnovne slikae tako, da za izr
 % Fnotes%2F456_rasterization.pdf&ei=6WRuUuIYita0BoaZgZgH&usg=AFQjCNHgr
 % Ig6qcQ3zXtszjawy9pEos0owQ&sig2=S1eiksIjOd80pAukxEv7xg&bvm=bv.5512
 % 3115,d.Yms
-%%
-%%
-%%
-\section{Optimizacijski algoritmi}
-%
-Pri požrešni metodi smo poteze postavljali na platno po vnaprej določenem pravilu. Ko smo potezo enkrat postavili na platno, je nismo več spreminjali. Opazimo pa, da bi bilo večkrat za dosego lepše slike bolje, da bi neki potezi spremenili obliko in barvo ali pa jo celo odstranili. Tak način razmišljanja uporablja optimizacijski pristop k likovnemu upodabljanju s potezami, ki ga bomo spoznali v tem razdelku.
-
-%
-Kadar imamo opravka z optimizacijo moramo običajno določiti kriterijsko funkcijo, s pomočjo katere dosežemo željeni rezultat. V našem primeru bo to \emph{LUP energijska funkcija} $\fun{E}{\J}{\R}$, kjer je $\J$ množica vseh možnih slik. Pri požrešnih metodah upodabljanja smo stil slike določili z izbiro parametrov, ki so določali potek algoritma. Tukaj pa bomo stil slike določili z izbiro energijske funkcije in vrsto poteze (npr.\ poteza s čopičem ali mozaična ploščica).
-
-%
-Kljub temu, da bomo pri slikanju na optimizacijski način dobili veliko boljši rezultat kot pri požrešni metodi, pa tak način slikanja ni naraven. Slikar namreč na platnu ponavadi neke poteze, ko jo naslika na platno, običajno ne more več spreminati. Slabost je tudi ta, da bo čas likovnega upodabljanja v nekaterih primerih drastično narastel (če bi pri požrešni metodi porabili pet minut, se kaj lahko zgodi, da bomo pri optimiziranju za dosego podobnega stila pri isti vhodni sliki potrebovali pet ur). Optimizacijski pristop po drugi strani pri svojem ustvarjanju uporabljajo sestavljalci mozaiki. Sestavljalec najprej na podlagi s prestavljanjem, izbiro ploščic druge barve in spreminjanjem oblike ploščic sestavi željeno sliko, nato pa ploščice zacementira.
-
-%
-V prvem podrazdelku bomo opisali energijsko funkcijo in opisali osnovne kriterije, ki jih bomo upoštevali pri njenem izračunu. V preostalih dveh podrazdelkih pa bomo opisali dva različna optimizacijska pristopa k upodabljanju. Prva skupina algoritmov, ki jo bomo opisali, so Voronojevi algoritmi. Z njimi bomo pokazali kako lahko sestavimo mozaik. Nato bomo spoznali še izkustvene algoritme, pri katerih bomo uporabljali hevristično izbrane teste, s pomočjo katerih bomo minimizirali energijsko funkcijo. Voronojevi algoritmi imajo boljšo časovno zahtevnost, ampak je ne moremo prilagoditi različnim vrstam problemov. Medtem ko imajo izkustveni algoritmi slabšo časovno zahtevnost, pa jih lahko z izbiro energijske funkcije in parametrov prilagodimo različnim problemov in poustvarimo veliko več likovnih stilov.
-%
-%% Energijska funkcija
-\subsection{Energijska funkcija}
-%
-Glavni dve merili, ki ju bomo upoštevali pri računanju vrednosti energijske funkcije $E$, sta število potez in ujemanje slike $J$ s fotografijo $I$. Kot smo že omenili, bi lahko namreč z ogromnim številom majhnih potez zelo dobro aproksimirali fotografijo $I$, vendar pa ne bi dobili likovno zadovoljivega rezultata. Pri optimiziranju skušamo doseči, da neko sliko zadovoljivo aproksimiramo s čim manjšim številom potez. Na ta način v sliko vnesemo abstrakcijo in željeni likovni pridih. Osnovna energijska funkcija, ki jo bomo optimizirali, bo:
-%
-\begin{align*}
-E(J) & = E_p(J) + w_n \cdot E_n(J), \\
-E_p(J) & = \sum_{(x, y) \in J} \norm{J(x, y) - I(x, y)}_2^2, \\
-E_n(J) & = \textup{število potez na sliki }J.
-\end{align*}
-%
-S spreminjanjem vrednosti parametra $w_n \in [0, 1]$ v energijski funkciji nadziramo število potez. Vrednosti parametra blizu $0$ pomenijo, da bomo uporabili veliko število potez, posledično bo slika $I$ zelo podobna fotografiji $J$ in ne bo vsebovala abstrakcije. Za dosego bolj likovno estetskega rezultata bomo uporabili vrednosti parametra $w_n$ blizu $1$, saj bomo na ta način zmanjšali število končnih potez in s tem dodali v sliko več estetskosti.
-
-%
-Kot bomo videli v nadaljevanju, bomo energijsko funkcijo prilagodili glede na dani problem, dodali več kriterijev in omogočili prosto izbiro več parametrov. Izbiri energijske funkcije, ki jo bomo uporabili pri optimiziranju, skupaj z modelom poteze bomo rekli \emph{stil slike}.
-%
-\begin{opomba}
-Energijsko funkcijo lahko izberemo tudi kot merilo za kvaliteto končne slike, ki jo dobimo pri upodabljanju s požrešno metodo.
-\end{opomba}
-%
-%% Voronojevi diagrami
-\subsection{Voronojevi algoritmi}
-%
-Za opis Voronojevega algoritma pri LUP bomo potrebovali osnove Voronojevih diagramov in KD--dreves. % TODO pravo ime za kd drevesa
-Bralec se lahko o slednjih pozanima v knjigi \cite{Orourke} in članku \cite{nevemse}. Hausner je v članku \cite{Hausner} na podlagi že znane Lloydove metode, ki je bila neodvisno predstavljena v člankih \cite{} (clustering) in \cite{} (kvantizacija), v primeru, ko na platno postavljamo neprekrivajoče se poteze s podobno obliko, problem prevedel na Voronojev diagram. Kasneje bomo to metodo predstavili in videli, da lahko z njo ustvarimo mozaike pri katerih uporabljamo kvadratne ploščice. Najprej pa bomo sedaj predstavili osnovno Lloydovo metodo.
-%
-\subsubsection{Loydova metoda}
-%
-Naj bo $p$ slikovna točka na platnu. Z $\{C_i\}_{i \in \I}$ bomo označili posebno množico slikovnih točk, ki jim pravimo \emph{centri}. Centri določajo postavitev potez na platnu, slednje namreč postavimo tako, da imajo središča v centrih. Naj bo $L_p^i \in \set{0, 1}$ označitev slikovnih točk, pri čemer $L_p^i = 1$ pomeni, da slikovna točka $p$ pripada centru $C_i$. Vsaka slikovna točka pripada natanko enemu centru, za vsak $i$ mora veljati $\sum_p L_p^i = 1$.
-
-\textbf{Naloga:} Izbira množice centrov in označitve slikovnih pik, ki minimizira naslednjo energijsko funkcijo:
-%
-\begin{align*}
-E(J) & = \sum_{p \in J,\ i \in \I} L_p^i \cdot \norm{p - C_i}_2^2 \\
-       & = \sum_{p \in J,\ i \in \I} L_p^i \cdot ((p_x - C_{i, x})^2 + (p_y - C_{i, y})^2) .
-\end{align*}
-%
-V primeru, ko bi že imeli optimalno postavljene centre, bi optimalno označitev enostavno izračunali tako, da bi vsaki slikovni točki pripisali njej najbližji center oz.~izračunali Voronojev diagram. Vendar pa so običajno na začetku centri podani neenakomerno in kot taki ne dajo dobrega rezultata (glej sliko \ref{img:slikaLevo}).
-%
-\begin{figure}[htbp]
-%
-\centering
-\subfigure[Naključno razporejeni centri.]{
-\includegraphics[width=0.4\textwidth]{./slike/levo.png}
-}
-%
-\subfigure[Enakomerno razporjeni centri.]{
-\includegraphics[width=0.4\textwidth]{./slike/desno.png}
-}
-%
-\caption{Iskanje novih kontrolnih točk.}
-\label{fig:slikaLevo}
-\end{figure}
-%
-Pri Lloydovi metodi na vsakem koraku optimizacije spremenimo položaje centrov in na novo označimo slikovne točke. Položaje novih centrov izračunamo tako, da pri fiksni označitvi slikovnih točk za center $C_i$ rešimo enačbo $\frac{\partial E(I)}{\partial C_i} = 0$. Nove položaje centrov izračunamo po formuli
-%
-$$C_i = \frac{\sum_p L_p^i  \cdot p}{\sum_p L_p^i}.$$
-%
-Zgornja formula nam da povprečje vseh slikovnih točk, ki trenutno pripadajo centru~$C_i$. Postopka izračuna novih položajev centrov in oz\-na\-čit\-ve slikovnih točk ponavljamo dokler ne dobimo optimalne rešitve. Optimalna rešitev obstaja, ker imamo na voljo le končno mnogo označitev slikovnih točk in na vsakem koraku izračunamo centre tako, da minimiziramo energijo funkcije pri fiksni označitvi. V algoritmu \ref{alg:Lloyd} je predstavljena psevdokoda zgoraj opisane Lloydove metode.
-%
-\begin{algorithm}[htb]
-  \caption{Lloydova metoda.}
-  \label{alg:Lloyd}
-\begin{algorithmic}[1]
-\Require $n$, $J$
-\Ensure množica centrov $\CC = \{C_i\}_{i \in \I}$
-\Function {Lloydova metoda} {$n$, $J$}
-  \State $\CC$ $\gets$ množica naključno izbranih $n$ točk na platnu $J$
-  \While {konvergira}
-    \State $L_p^i$ $\gets$
-             $\begin{cases}
-               1 &\mbox{če } i = \argmin_i\norm{p - C_i}_2^2\\
-               0 & \mbox{sicer}
-              \end{cases}$
-    \State $C_i$ $\gets$ $\frac{\sum_p L_p^i p}{\sum_p L_p^i}$
-  \EndWhile
-  \State \Return $\CC$
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
-%
-
-Na sliki \ref{img:slikaLevo} desno so narisani centri in Voronojeve celice, h katerimi je skonvergiral algoritem.
-%%
-\subsubsection{Utežena Lloydova metoda}
-%Adrian Secord. Weighted Voronoi Stippling. In NPAR 2002: Proceedings of the Second Annual Symposium on Non-Photorealistic Animation and Rendering, June 2002.
-Secord je v članku \cite{Secord} predstavil uteženo Lloydovo metodo. Uporabil jo je za upodabljanje črnobelih slik s črnimi pikami. Ker gre za črnobelo sliko, moramo paziti pri razporeditvi pik na območjih z različnimi sivinami in v okolici linij, ki določajo objekte na sliki, saj bi sicer lahko dobili monotono sliko. Secord je problem rešil tako, da je različnim območjem na sliki predpisal gostoto upodobljenih pik.
-%
-\begin{opomba}
-Možna rešitev problema bi bila tudi uporaba pik različnih velikosti.
-\end{opomba}
-%
-\emph{Ploskovno gostoto} $\rho$, ki jo bomo uporabili v algoritmu, za posamezne slikovne točke izračunamo tako, da njihove vrednosti na fotografiji $J$ preslikamo na interval $[0, 1]$:
-$$\rho(p) = 1 - \frac{J(p)}{M},$$
-kjer je $M$ največja vrednost slikovne točke na $J$. Prejšnjo energijsko funkcijo popravimo tako da posamezne člene v vsoti pomnožimo z gostoto in dobimo:
-%
-\begin{align*}
-E(J) & = \sum_{p \in J} L_p^i \rho(p) \norm{p - C_i}^2 \\
-       & = \sum_{p \in J} L_p^i \rho(p) ((p_x - C_{i, x})^2 + (p_y - C_{i, y})^2).
-\end{align*}
-%
-Na ta način zagotovimo, da bodo na temnejših območjih pike razporejene bolj na gosto, na svetlih območjih pa bolj na redko. S tem bomo dobili tudi izrazitejše linije na sliki, saj so linije na fotografiji temnejše. Utežena Lloydova metoda se od navadne Lloydove metode razlikuje le v izračunu novih centrov (korak $5$), ki jih sedaj izračunamo kot \emph{uteženo} povprečje slikovnih točk iz pripadajoče Voronojeve celice: Nov center $C_i$ izračunamo s formulo
-%
-$$C_i = \frac{\sum_p L_p^i \rho(p)p}{\sum_p L_p^i \rho(p)}.$$
-%
-\begin{opomba}
-Izračun novih centrov lahko znatno pohitrimo s tem, da vsote, ki nastopajo v imanovalcih izračunamo vnaprej in jih potem v izračunih novih centrov samo uporabimo.
-\end{opomba}
-%
-Na sliki \ref{fig:stipples} je prikazan primer uporabe utežene Lloydove metode. Podobno kot pri Lloydovi metodi bomo tudi sedaj dobili optimalno rešitev.
-%
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.8\textwidth]{./slike/stipples.png}
-\caption{Primer.}
-\label{fig:stipples}
-\end{figure}
-%
-%%
-\subsubsection{Lloydova metoda za ustvarjanje mozaikov}
-%
-Sedaj si bomo pogledali kako lahko barvno sliko pretvorimo v mozaik. Mozaik lahko enostavno sestavimo tako, da izračunamo Voronojev diagram s pomočjo Lloydove metode. Za barvo posamezne Voronojeve celice lahko izberemo kar barvo slikovne točke na fotografiji, ki ustreza centru te celice. Na sliki \ref{img:Voronoj1} je prikazan primer uporabe te metode.
-%
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.8\textwidth]{./slike/stipples.png}
-\caption{Primer.}
-\label{fig:Voronoj1}
-\end{figure}
-%
-
-Hausner pa je v članku \cite{Hausner} na podlagi Lloydove metode predstavil metodo, s pomočjo katere lahko sestavimo mozaik iz kvadratnih ploščic. Razlog, da so Voronojeve celice konveksni nepravilni večkotniki je uporaba evklidske razdalje pri računanju Voronojevega algoritma. Izračun Voronojevega algoritma namreč sloni na naslednji ideji. Na vsakega izmed centrov postavimo neskončni stožec s stranicami pod kotom $45 \circ$ tako, da ima vrh pri centru. Stožec uporabimo zato, ker slikovne točke, ki so enako oddaljene od centra ležijo na krožnici. Če stožec projeciramo na ravnino dobimo neskončno množico krožnic. Opazimo, da slikovne točke, ki so enako oddaljene od dveh centrov ležijo na projekciji presečišča pripadajočih stožcev. Voronojev diagram dobimo, če pogledamo stožce od spodaj. %TODO to lepše spiši
-Na sliki \ref{fig:VoronojStozci} je prikazan pogled Voronojevaga diagrama od spodaj.
-%
-\begin{figure}[htbp]
-%
-\centering
-\subfigure[Naključno razporejeni centri.]{
-\includegraphics[width=0.4\textwidth]{./slike/levo.png}
-}
-%
-\subfigure[Enakomerno razporjeni centri.]{
-\includegraphics[width=0.4\textwidth]{./slike/desno.png}
-}
-%
-\caption{Iskanje novih kontrolnih točk.}
-\label{fig:VoronojStozci}
-\end{figure}
-%
-
-Pri Manhattanski razdalji ($\norm{v}_1 = \abs{v_x} + \abs{v_y}$) so krožnice kvadrati. Slednje je izkoristil Hausner, ki je stožce nadomestil s kvadratnimi piramidami. Uvedel je tudi vektorsko polje $\Phi(p)$, ki ga je uporabil za orientacijo kvadratnih ploščic. Pri izračunu Voronojevega diagrama orientacijo v centru upoštevamo tako, da zarotiramo piramide v predpisani smeri in nato nadaljujemo s postopkom. Orientacijo ploščic uporabimo zato, da oblike in linije na mozaiku pridejo do izraza. Upoštevati pa jo moramo že pri same izračunu zato, ker bi v primeru rotiranja ploščic na koncu, ko bi že imeli določene centre, prišlo do prekrivanja ploščic, česar pa ne želimo.%TODO lepo spiši
-
-Energijska funkcija, ki smo jo dobili pri teh pogojih je enaka
-%
-\begin{align*}
-E(J) = \sum_{p \in J} L_p^i \norm{R_{\Phi(C_i)} (p - C_i)}_1^2,
-\end{align*}
-%
-kjer je $R_{\Phi(C_i)}$ rotacijska matrika s parametrom $\Phi(C_i)$. V algoritmu \ref{alg:LloydHausner} je povzeta psevdokoda delovanja zgornje metode.
-%
-%
-\begin{algorithm}[htb]
-  \caption{Lloydova metoda.}
-  \label{alg:LloydHausner}
-\begin{algorithmic}[1]
-\Require $n$, $J$
-\Ensure množica centrov $\CC = \{C_i\}_{i \in \I}$
-\Function {Lloydova metoda} {$n$, $J$}
-  \State $\CC$ $\gets$ množica naključno izbranih $n$ točk na platnu $J$
-  \While {konvergira}
-    \State $L_p^i$ $\gets$
-             $\begin{cases}
-               1 &\mbox{če } i = \argmin_i\norm{R_{\Phi}(p - C_i)}_1^2\\
-               0 & \mbox{sicer}
-              \end{cases}$
-    \State $C_i$ $\gets$ $\frac{\sum_p L_p^i p}{\sum_p L_p^i}$
-  \EndWhile
-  \State \Return $\CC$
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
-%
-
-Bralca moramo tu opozoriti na to, da zgornji algoritem teoretično ni več optimizacijski algoritem, saj na posameznih korakih ne dobimo nujno boljše rešitve. %TODO povej kdaj se sfiži
-Kljub temu pa se v praksi izkaže, da dobimo s pomočjo tega algoritma zadovoljive rezultate. Sedaj, ko znamo izračunati centre ploščic, si poglejmo še kako določimo barvo, velikost in orientacijo ploščic pri njihovemu  končnemu upodabljanju.
-%
-\begin{opomba}
-Algoritem bi lahko izboljšali še tako, da bi na različnih območjih uporabljali različno velike ploščice. Npr.~če delamo mozaik potreta, potem bi bilo smiselno za ozadje uporabiti večje ploščice, za detajle kot so oči, nos in usta pa manjše. 
-\end{opomba}
-%
-Predstavljenega Voronojevega algoritma se ne da enostavno razširiti tako, da bi pri minimizaciji in izračunu energijske funkcije upoštevali barvo ploščic. Problem, ki ni enostavno rešljiv, je tudi prekrivanje sosednjih ploščic, saj v samem algoritmu te omejitve ne upoštevamo. Kot vidimo je Voronojev algoritem kot tak neprilagodljiv in ga ne moremo uporabiti pri npr.~postavljanju potez čopiča. Je pa zato toliko bolj prilagodljiv in široko uporabljen izkustveni algoritem, ki ga bomo predstavili v naslednjem podrazdelku.
-%%
-\subsection{Izkustveni algoritmi}
-%
-Podobno kot pri Lloydovi metodi bomo tudi tu potrebovali energijsko funkcijo za izračun vrednosti energije trenutne slike, ki bo tu upoštevala več parametrov in omejitev kot smo jih prej. Bistvena razlika pa je tu pri izračunu nove slike. Na vsakem koraku algoritma bo namreč predlagana nova sprememba glede ene poteze. Kadar bo ta sprememba vodila v zmanjšanje skupne energije slike, jo bomo obdržali, sicer pa zavrgli. Slaba lastnost tega algoritma je, da v primeru slabo zastavljenega izbora novih sprememb potez, algoritem ne bo konvergiral, prav tako ni nikakršnega zagotovila, da bo algoritem skonvergiral k dobri rešitvi v zadovoljivem času.
-
-V nadaljevanju bomo opisali algoritem, ki ga je v članku \cite{Hertzmann:Relaxation} predstavil Hertzmann. Njegov algoritem je nagradnja že znanega postopka za slikanje s čopičem, ki ga je predlagal Haeberli v članku \cite{Haeberli:PaintNumbers}, in članka \cite{Turk:Guided}, v katerem sta Turk in Banks na ta način predstavila upodabljanje vektorskih polj s tokovnicami. Za začetek si poglejmo algoritem~\ref{alg:trialanderror}, v katerem je povzeta psevdokoda za izkustveni algoritem.
-%
-%
-\begin{algorithm}[htb]
-  \caption{Izkustveni algoritem.}
-  \label{alg:trialanderror}
-\begin{algorithmic}[1]
-\Require fotografija $I$
-\Ensure slika $J$
-\Function {IzkustvenaMetoda} {$J$}
-  \State $J$ $\gets$ začetna slika (belo platno)
-  \While {konvergira}
-    \State $P$ $\gets$ \Call {Poteza}{\ }%TODO zakaj ne nardi ()
-    \If {$E(P(J)) < E(J)$}
-       \State $J$ $\gets$ $P(J)$
-    \EndIf
-  \EndWhile
-  \State \Return $J$
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
-%
-
-Najprej bomo opozorili na dejstvo, da zaustavitvenega pogoja v zgornjem algoritmu nismo natančno določili, temveč odločitev o zaustavitvi algoritma prepustimo uporabniku. Glavni nalogi v zgornjem algoritmu sta sistem, ki je zadolžen za predlaganje novih sprememb na sliki, in izračun energijske funkcije. Pri izračunu energijske funkcije je pomembno, da znamo uravnotežiti različne zahteve, ki jim mora ustrezati slika, npr.~čim manjše število potez in dobra aproksimacija slike z vhodno fotografijo.
-%
-\subsubsection{Energijska funkcija}
-Naloga, ki smo se je lotili, je izmed vseh možnih slik poiskati tisto, ki se bo najbolj ujemala z vhodno fotografijo, bo v celoti pokrita z barvo in bo naslikana s čim manj potezami. Energijska funkcija, ki jo bomo minimizirali, je dana s formulo
-%
-$$E(J) = E_{p}(J) + E_{b}(J) + E_{n}(J) + E_{nb}(J).$$
-%
-Kot vidimo, v energijski funkciji nastopa več pomožnih energijskih funkcij:
-%
-\begin{enumerate}
-\item \emph{Ujemanje slike s fotografijo}:
-$$E_{p}(J) = \sum_{p \in J} w_{p}(p) \norm{J(p) - I(p)}.$$
-Energijska funkcija $E_p$ meri razliko med fotografijo $I$ in sliko $J$ po slikovnih točkah. Ralika med posameznimi slikovnimi je evklidska razdalja med slikovnima točkama, predstavljenima v RGB prostoru. Uteži $w_p$ lahko določimo ročno ali avtomatično. Avtomatično jih določimo tako, da izračunamo linijsko binarno sliko z uporabo Sobelovega filtra. Na ta način bodo poteze čopiča v okolici linij in podrobnosti na sliki prišle bolj do izraza, saj bo na teh delih slike algoritem pri izračunu energije dal večji poudarek ujemanju slike z vhodno fotografijo. Ročno uteži lahko določimo enostavno tako, da poleg fotografije, ustvarimo binarno sliko, na kateri označimo dele slike, za katere želimo, da so naslikani bolj natančno.
-%
-\item \emph{Količina barve}:
-$$E_{b}(J) = w_{b} \sum_{P \in J} S(P).$$
-Kot vidimo je ta energijska funkcija v tekmovalnem odnosu s prvo. Tukaj namreč želimo, da na sliki uporabimo čim manj barve, energijska funkcija $E_p$ pa uravnava ujemanje s fotografijo. Z uravnavanjem parametrov teh dveh funkcij lahko uporabnik v grobem ustvari različne slikarske stile.
-%
-\item \emph{Število potez}:
-$$E_{n}(J) = w_{n} \cdot \textup{(število potez na sliki $J$)}.$$
-%
-\item \emph{Pokritost območja:}
-$$E_{nb}(I) = w_{nb} \cdot \textup{(število nepobarvanih slikovnih točk v $J$)}.$$
-\end{enumerate}
-%
-\subsubsection{Sistem za predlaganje sprememb potez na sliki}
-%
-\emph{Sistem za predlaganje sprememb na sliki}, ki bi dovolil, da uporabljamo poteze vseh vrst (npr.~diske), se ne bi obnesel dobro v smislu hitrosti delovanje. V takem sistemu bi namreč dobili preveč sprememb, ki ne bi znižale energijske funkcije, in bi torej bile zgolj potrata časa. V našem sistemu, ki bo služil za upodabljanje slik s čopičem, se bomo zato omejili na poteze s čopičem. Vsaka poteza bo določena z debelino čopiča in množico kontrolnih točk (glej \ref{defPoteza}). %TODO definiraj to potezo pri požrešni metodi
-
-Vzpostavitev dobrega sistema je ključnega pomena pri tem algoritmu. Če bi izbirali nove spremembe naključno, bi namreč ponovno po nepotrebnem trošili čas. Ena izmed možnih rešitev je tudi ta, da na vsakem koraku uporabnik sam predlaga nove spremembe, ki jih program ovrže ali obdrži. V nadaljevanju bomo najprej opisali možne posamezne spremembe in nato še skupine sprememb, ki jih sistem lahko predlaga.
-%
-\subsubsection{Opis posameznih možnih sprememb:}
-%
-\begin{itemize}
-  \item Dodajanje nove poteze: na podlagi izbrane točke na sliki ustvarimo novo potezo. Novo potezo vedno dodamo na konec seznama vseh potez (poteze narišemo na platno v vrstenm redu). Na način, ki je opisan v \ref{9} dodamo nove kontrolne točke. Novo potezo nato relaksiramo. Rezultat tega iskanja je nato predlog za novo spremembo na sliki.
-  \item Reaktivacija poteze: Dana poteza je relaksirana in sprememeba je nov predlog. Vendar pa v primeru, ko bi brisanje poteze iz slike energijo slike zmanjšajo bolj kot modifikacija poteze, potem potezo pobrišemo. Brisanje ene poteze ne vpliva na vrstni red potez. Na ta način bomo v postopku pobrisali poteze, ki so zadaj za ostalimi potezami, če za vključitev poteze na sliko obstaja kazen (tj.\ $w_{area} > 0$ ali $w_{nstr} > 0$).
-  \item Odebelitev poteze: Če je radij poteze pod maksimumom, potem povečamo njen radij. Potezo zatem reaktiviramo. To potezo sedaj damo kot nov predlog za spremembo.
-  \item Zoožanje poteze: Če je radij poteze nad minimumom, potem radij poteze zmanjašamo in potezo reaktiviramo.
-  \item Prebaravanje: Barvo poteze nastavimo na povprečno vrednost barv območja vhodne slike, ki ga obsega poteza. Potezo nato reaktiviramo.
-\end{itemize}
-%
-\subsubsection{Kombinacija korakov:}
-%
-Individualne spremembe kombiniramo v zanke, da zagotovimo, da je vsaka poteza vsaj enkrat relaksirana.
-%
-\begin{itemize}
-  \item Postavitvena plast: Zanka preko slike, znotraj katere s pomočjo postopka \textit{Dodajanje poteze} dodamo novo potezo s predpisanim radijem in naključno spremenjeno začetno točko.
-  \item Splošna reaktivacija: Iteracija preko množice vseh potez v njihovem zaporedju in njihova \textit{Relaksacija}.
-  \item Odebeljenje/Zoožanje vseh potez: Za vsako potezo izvedemo postopek \textit{Odebelitve} dokler sprememba ni zavržena li pa poteza pobrisana. V primeru, ko poteza ostane nespremenjena izvedemo postopek \textit{Zoožitve} dokler ta sprememba ni zavrnjena lai pa poteza pobrisana.
-  \item Splošno prebarvanje: Iteriramo preko množice potez in uporabimo postopek \textit{prebarvanje}.
-  \item Skripta: Izvedi zaporedje relaksacijskih zank. Če želimo narediti sliko na novo, uporabimo naslednji algoritem:
-% TODO algoritem
-\end{itemize}
-%
-Običajno je $N=2$. Zgornja skripta običajno pripelje do konvergence. Opazimo, da relaksacijsko zanko izvedemo na vseh potezah, ne le teh, ki imajo trenutno velikost.
-
-\textbf{Relaksacija poteze:} Osnovna strategija, ki jo uporabimo za sistem predlaganja novih sprememb, je uporaba \emph{relaksacija poteze}. Gre za adaptacijo snakes \ref{10, 2} na energijsko funkcijo: poišče aproksimacijo lokalnega minimuma za dani položaj poteze.
-
-High-level algoritem za modifikacijo poteze je:
-%
-\begin{enumerate}
-  \item Izračunamo energijo slike.
-  \item Izberemo eno izmed obstoječih potez.
-  \item Po potrebi spremenimo parametre poteze.
-  \item Relaksacija poteze.
-  \item Izračunamo novo energijo slike.
-\end{enumerate}
-%
-Podrobnosti implementacije so v poglavju 8.1. Na tem mestu omenimo naslednja dva aspekta implementacije:
-%
-\begin{itemize}
-  \item Pri postopku iskanja poteze izračunamo energijo slike brez te poteze. Na ta način je lahko predlagana sprememba brisanje poteze brez dodatnega stroška.
-  \item Postopek relaksacije bi bil zelo drag postopek in težek za implementacijo, če bi ga naredili eksaktno. Namesto tega uporabimo aproksimacijo za računanje energije zunaj relaksacijske zanke in izračunamo eksatno vrednost energije, ko je sprememba predlagana.
-\end{itemize}
-%
-% TODO Zahtevnost.
-%%
